@@ -1,6 +1,6 @@
 # flutter_app
 
-A new Flutter application.
+Rum8 Flutter application.
 
 ## Getting Started
 
