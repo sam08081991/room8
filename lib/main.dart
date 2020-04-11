@@ -1,24 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/src/app.dart';
+import 'package:flutter_app/src/blocs/auth_bloc.dart';
+import 'package:flutter_app/src/resources/home_page.dart';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-      backgroundColor: Colors.deepOrange[500],
-      appBar: AppBar(
-        backgroundColor: Colors.amberAccent,
-        title: Center(
-          child: Text('Rumate'),
-        ),
-      ),
-      body: Center(
-        child: Image(
-          image: AssetImage('images/label-collection-with-vintage-style.jpg'),
-        ),
-      ),
-    ));
-  }
+void main() {
+//  runApp(MyApp(
+//      new AuthBloc(),
+//      MaterialApp(
+//        home: HomePage(),
+//      )));
+  runApp(MyApp());
 }
