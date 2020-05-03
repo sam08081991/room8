@@ -126,7 +126,9 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
             ],
           ),
         ),
-        body: new Center(
+        body: Container(
+          padding: EdgeInsets.fromLTRB(3, 0, 3, 0),
+          constraints: BoxConstraints.expand(),
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
             physics: ClampingScrollPhysics(),
