@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
 
 class AuthBloc {
-  var _firAuth = FirAuth();
+  var _firAuth = FireAuth();
 
   StreamController _nameController = new StreamController();
   StreamController _emailController = new StreamController();

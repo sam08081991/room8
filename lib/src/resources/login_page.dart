@@ -127,15 +127,15 @@ class _LoginPageState extends State<LoginPage> {
   void _onLoginClick() {
     String email = _emailController.text;
     String pass = _passController.text;
-//    var authBloc = MyApp.of(context).authBloc;
-//    LoadingDialog.showLoadingDialog(context, "Loading...");
-//    authBloc.signIn(email, pass, () {
-//      LoadingDialog.hideLoadingDialog(context);
-//      Navigator.of(context)
-//          .push(MaterialPageRoute(builder: (context) => HomePage()));
-//    }, (msg) {
-//      LoadingDialog.hideLoadingDialog(context);
-//      MsgDialog.showMsgDialog(context, "Sign-In", msg);
-//    });
+    var authBloc = MyApp.of(context).authBloc;
+    LoadingDialog.showLoadingDialog(context, "Loading...");
+    authBloc.signIn(email, pass, () {
+      LoadingDialog.hideLoadingDialog(context);
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => HomePage()));
+    }, (msg) {
+      LoadingDialog.hideLoadingDialog(context);
+      MsgDialog.showMsgDialog(context, "Sign-In", msg);
+    });
   }
 }

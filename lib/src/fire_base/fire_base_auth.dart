@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-class FirAuth {
+class FireAuth {
   final FirebaseAuth _fireBaseAuth = FirebaseAuth.instance;
 
   void signUp(String email, String pass, String name, String phone,
@@ -9,8 +9,7 @@ class FirAuth {
     _fireBaseAuth
         .createUserWithEmailAndPassword(email: email, password: pass)
         .then((user) {
-      print(user);
-//      _createUser(user.uid, name, phone, onSuccess, onRegisterError);
+      _createUser(user.user.uid, name, phone, onSuccess, onRegisterError);
     }).catchError((err) {
       print("err: " + err.toString());
       _onSignUpErr(err.code, onRegisterError);
@@ -29,14 +28,14 @@ class FirAuth {
     });
   }
 
-  _createUser(String userId, String name, String phone, Function onSuccess,
-      Function(String) onRegisterError) {
+  _createUser(String userAsString, String name, String phone,
+      Function onSuccess, Function(String) onRegisterError) {
     var user = Map<String, String>();
     user["name"] = name;
     user["phone"] = phone;
 
     var ref = FirebaseDatabase.instance.reference().child("users");
-    ref.child(userId).set(user).then((vl) {
+    ref.child(userAsString).set(user).then((vl) {
       print("on value: SUCCESSED");
       onSuccess();
     }).catchError((err) {
