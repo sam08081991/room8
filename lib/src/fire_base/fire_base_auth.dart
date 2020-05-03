@@ -24,7 +24,7 @@ class FireAuth {
       onSuccess();
     }).catchError((err) {
       print("err: " + err.toString());
-      onSignInError("Sign-In fail, please try again");
+      onSignInError("Cannot sign in, please try again");
     });
   }
 

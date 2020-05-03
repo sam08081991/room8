@@ -132,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
     authBloc.signIn(email, pass, () {
       LoadingDialog.hideLoadingDialog(context);
       Navigator.of(context)
-          .push(MaterialPageRoute(builder: (context) => HomePage()));
+          .push(MaterialPageRoute(builder: (context) => MenuDashboardPage()));
     }, (msg) {
       LoadingDialog.hideLoadingDialog(context);
       MsgDialog.showMsgDialog(context, "Sign-In", msg);
