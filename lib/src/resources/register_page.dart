@@ -1,31 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/src/blocs/auth_bloc.dart';
-
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
+import 'dart:io';
 import 'dialog/loading_dialog.dart';
 import 'dialog/msg_dialog.dart';
 import 'home_page.dart';
 
 class RegisterPage extends StatefulWidget {
+  RegisterPage({Key key, this.auth}) : super(key: key);
+
+  final FireAuth auth;
+
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  AuthBloc authBloc = new AuthBloc();
-
   TextEditingController _nameController = new TextEditingController();
   TextEditingController _emailController = new TextEditingController();
   TextEditingController _passController = new TextEditingController();
   TextEditingController _phoneController = new TextEditingController();
+  File photo;
 
   @override
   void dispose() {
-    authBloc.dispose();
+    widget.auth.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: Container(
         padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
@@ -35,9 +40,41 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             children: <Widget>[
               SizedBox(
-                height: 140,
+                height: 100,
               ),
-              Image.asset('ic_car_red.png'),
+              CircleAvatar(
+                radius: size.width * 0.3,
+                backgroundColor: Colors.transparent,
+                child: photo == null
+                    ? GestureDetector(
+                        onTap: () async {
+                          File getPick =
+                              await FilePicker.getFile(type: FileType.image);
+
+                          if (getPick != null) {
+                            setState(() {
+                              photo = getPick;
+                            });
+                          }
+                        },
+                        child: Image.asset('default-avatar.png', width: 200))
+                    : GestureDetector(
+                        onTap: () async {
+                          File getPick =
+                              await FilePicker.getFile(type: FileType.image);
+
+                          if (getPick != null) {
+                            setState(() {
+                              photo = getPick;
+                            });
+                          }
+                        },
+                        child: CircleAvatar(
+                          radius: size.width * 0.3,
+                          backgroundImage: FileImage(photo),
+                        ),
+                      ),
+              ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 40, 0, 6),
                 child: Text(
@@ -52,7 +89,7 @@ class _RegisterPageState extends State<RegisterPage> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 80, 0, 20),
                 child: StreamBuilder(
-                    stream: authBloc.nameStream,
+                    stream: widget.auth.nameStream,
                     builder: (context, snapshot) => TextField(
                           controller: _nameController,
                           style: TextStyle(fontSize: 18, color: Colors.black),
@@ -70,7 +107,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         )),
               ),
               StreamBuilder(
-                  stream: authBloc.phoneStream,
+                  stream: widget.auth.phoneStream,
                   builder: (context, snapshot) => TextField(
                         controller: _phoneController,
                         style: TextStyle(fontSize: 18, color: Colors.black),
@@ -89,7 +126,7 @@ class _RegisterPageState extends State<RegisterPage> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
                 child: StreamBuilder(
-                    stream: authBloc.emailStream,
+                    stream: widget.auth.emailStream,
                     builder: (context, snapshot) => TextField(
                           controller: _emailController,
                           style: TextStyle(fontSize: 18, color: Colors.black),
@@ -107,7 +144,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         )),
               ),
               StreamBuilder(
-                  stream: authBloc.passStream,
+                  stream: widget.auth.passStream,
                   builder: (context, snapshot) => TextField(
                         controller: _passController,
                         obscureText: true,
@@ -132,10 +169,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: RaisedButton(
                     onPressed: _onSignUpClicked,
                     child: Text(
-                      "Signup",
+                      "Sign up",
                       style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
-                    color: Color(0xff3277D8),
+                    color: Colors.black54,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(6))),
                   ),
@@ -150,8 +187,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       children: <TextSpan>[
                         TextSpan(
                             text: "Login now",
-                            style: TextStyle(
-                                color: Color(0xff3277D8), fontSize: 16))
+                            style:
+                                TextStyle(color: Colors.black54, fontSize: 16))
                       ]),
                 ),
               )
@@ -163,17 +200,19 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   _onSignUpClicked() {
-    var isValid = authBloc.isValid(_nameController.text, _emailController.text,
-        _passController.text, _phoneController.text);
+    var isValid = widget.auth.isValid(_nameController.text,
+        _emailController.text, _passController.text, _phoneController.text);
     if (isValid) {
       // create user
       // loading dialog
       LoadingDialog.showLoadingDialog(context, 'Loading...');
-      authBloc.signUp(_emailController.text, _passController.text,
-          _phoneController.text, _nameController.text, () {
+      widget.auth.signUp(_emailController.text, _passController.text,
+          _phoneController.text, _nameController.text, photo, () {
         LoadingDialog.hideLoadingDialog(context);
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => MenuDashboardPage()));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MenuDashboardPage(auth: widget.auth)));
       }, (msg) {
         LoadingDialog.hideLoadingDialog(context);
         MsgDialog.showMsgDialog(context, "Sign-In", msg);

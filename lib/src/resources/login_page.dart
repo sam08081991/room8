@@ -1,19 +1,23 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
 import 'package:flutter_app/src/resources/register_page.dart';
-import '../app.dart';
 import 'dialog/loading_dialog.dart';
 import 'dialog/msg_dialog.dart';
 import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
+  LoginPage({Key key, this.auth}) : super(key: key);
+
+  final BaseAuth auth;
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passController = TextEditingController();
+  TextEditingController _email = TextEditingController();
+  TextEditingController _password = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +30,9 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: <Widget>[
               SizedBox(
-                height: 140,
+                height: 100,
               ),
-              Image.asset('ic_car_green.png'),
+              Image.asset('room8-logo.png', width: 200),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 40, 0, 6),
                 child: Text(
@@ -42,8 +46,8 @@ class _LoginPageState extends State<LoginPage> {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 70, 0, 20),
-                child: TextField(
-                  controller: _emailController,
+                child: TextFormField(
+                  key: new Key('email'),
                   style: TextStyle(fontSize: 18, color: Colors.black),
                   decoration: InputDecoration(
                       labelText: "Email",
@@ -53,31 +57,28 @@ class _LoginPageState extends State<LoginPage> {
                           borderSide:
                               BorderSide(color: Color(0xffCED0D2), width: 1),
                           borderRadius: BorderRadius.all(Radius.circular(6)))),
+                  autocorrect: false,
+                  validator: (val) =>
+                      val.isEmpty ? 'Email can\'t be empty.' : null,
+                  controller: _email,
                 ),
               ),
-              TextField(
-                controller: _passController,
+              TextFormField(
+                key: new Key('password'),
                 style: TextStyle(fontSize: 18, color: Colors.black),
                 obscureText: true,
                 decoration: InputDecoration(
                     labelText: "Password",
-                    prefixIcon: Container(
-                        width: 50, child: Image.asset("ic_phone.png")),
+                    prefixIcon:
+                        Container(width: 50, child: Image.asset("ic_lock.png")),
                     border: OutlineInputBorder(
                         borderSide:
                             BorderSide(color: Color(0xffCED0D2), width: 1),
                         borderRadius: BorderRadius.all(Radius.circular(6)))),
-              ),
-              Container(
-                constraints: BoxConstraints.loose(Size(double.infinity, 30)),
-                alignment: AlignmentDirectional.centerEnd,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 10, 0),
-                  child: Text(
-                    "Forgot password?",
-                    style: TextStyle(fontSize: 16, color: Color(0xff606470)),
-                  ),
-                ),
+                autocorrect: false,
+                validator: (val) =>
+                    val.isEmpty ? 'Password can\'t be empty.' : null,
+                controller: _password,
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 30, 0, 40),
@@ -90,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                       "Log In",
                       style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
-                    color: Color(0xff3277D8),
+                    color: Colors.black54,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(6))),
                   ),
@@ -109,7 +110,8 @@ class _LoginPageState extends State<LoginPage> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => RegisterPage()));
+                                        builder: (context) =>
+                                            RegisterPage(auth: widget.auth)));
                               },
                             text: "Sign up for a new account",
                             style: TextStyle(
@@ -125,14 +127,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onLoginClick() {
-    String email = _emailController.text;
-    String pass = _passController.text;
-    var authBloc = MyApp.of(context).authBloc;
     LoadingDialog.showLoadingDialog(context, "Loading...");
-    authBloc.signIn(email, pass, () {
+    widget.auth.signIn(_email.text, _password.text, () {
       LoadingDialog.hideLoadingDialog(context);
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (context) => MenuDashboardPage()));
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => MenuDashboardPage(auth: widget.auth)));
     }, (msg) {
       LoadingDialog.hideLoadingDialog(context);
       MsgDialog.showMsgDialog(context, "Sign-In", msg);

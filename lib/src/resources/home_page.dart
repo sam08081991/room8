@@ -1,29 +1,30 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
+import 'package:flutter_app/src/resources/login_page.dart';
 import './page.dart';
 
 class MenuDashboardPage extends StatefulWidget {
+  MenuDashboardPage({this.auth});
+  final BaseAuth auth;
+
   @override
   _MenuDashboardPageState createState() => _MenuDashboardPageState();
 }
 
+enum AuthStatus {
+  signedIn,
+}
+
 class _MenuDashboardPageState extends State<MenuDashboardPage>
-    with SingleTickerProviderStateMixin {
-  String currentProfilePic =
-      "https://avatars3.githubusercontent.com/u/16825392?s=460&v=4";
-  String otherProfilePic =
-      "https://yt3.ggpht.com/-2_2skU9e2Cw/AAAAAAAAAAI/AAAAAAAAAAA/6NpH9G8NWf4/s900-c-k-no-mo-rj-c0xffffff/photo.jpg";
+    with TickerProviderStateMixin {
+  String currentProfilePic = null;
   bool isCollapsed = true;
   double screenWidth, screenHeight;
   final Duration duration = const Duration(milliseconds: 200);
   AnimationController _controller;
-
-  void switchAccounts() {
-    String picBackup = currentProfilePic;
-    this.setState(() {
-      currentProfilePic = otherProfilePic;
-      otherProfilePic = picBackup;
-    });
-  }
 
   @override
   void initState() {
@@ -54,9 +55,12 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
   }
 
   Widget dashboard(BuildContext context) {
+//    FirebaseUser user = this.getUser(widget.auth.currentUser());
+//    print(user);
+//    ref.getDownloadURL().then((loc) => setState(() => currentProfilePic = loc));
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text("My Rum8",
+          title: new Text("My Room8",
               style: TextStyle(fontSize: 24, color: Colors.white70)),
           centerTitle: true,
           backgroundColor: Colors.black54,
@@ -77,31 +81,23 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
           child: new ListView(
             children: <Widget>[
               new UserAccountsDrawerHeader(
-                accountEmail: new Text("bramvbilsen@gmail.com"),
-                accountName: new Text("Bramvbilsen"),
+                accountEmail: new Text("samsam@gmail.com"),
+                accountName: new Text("Sam Nguyen"),
                 currentAccountPicture: new GestureDetector(
                   child: new CircleAvatar(
-                    backgroundImage: new NetworkImage(currentProfilePic),
+                    backgroundImage:
+                        new Image.asset('default-avatar.png').image,
                   ),
                   onTap: () => print("This is your current account."),
                 ),
-                otherAccountsPictures: <Widget>[
-                  new GestureDetector(
-                    child: new CircleAvatar(
-                      backgroundImage: new NetworkImage(otherProfilePic),
-                    ),
-                    onTap: () => switchAccounts(),
-                  ),
-                ],
                 decoration: new BoxDecoration(
                     image: new DecorationImage(
-                        image: new NetworkImage(
-                            "https://img00.deviantart.net/35f0/i/2015/018/2/6/low_poly_landscape__the_river_cut_by_bv_designs-d8eib00.jpg"),
+                        image: new AssetImage("menu-top-background.jpg"),
                         fit: BoxFit.fill)),
               ),
               new ListTile(
-                  title: new Text("Page One"),
-                  trailing: new Icon(Icons.arrow_upward),
+                  title: new Text("Update room information"),
+                  trailing: new Icon(Icons.home),
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(new MaterialPageRoute(
@@ -109,19 +105,24 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
                             new Page("First Page")));
                   }),
               new ListTile(
-                  title: new Text("Page Two"),
-                  trailing: new Icon(Icons.arrow_right),
+                  title: new Text("Update profile"),
+                  trailing: new Icon(Icons.info),
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(new MaterialPageRoute(
                         builder: (BuildContext context) =>
-                            new Page("Second Page")));
+                            new Page("First Page")));
                   }),
-              new Divider(),
               new ListTile(
                 title: new Text("Cancel"),
-                trailing: new Icon(Icons.cancel),
+                trailing: new Icon(Icons.input),
                 onTap: () => Navigator.pop(context),
+              ),
+              new Divider(),
+              new ListTile(
+                title: new Text("Sign out"),
+                trailing: new Icon(Icons.cancel),
+                onTap: _onSignOutClicked,
               ),
             ],
           ),
@@ -133,12 +134,12 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
             scrollDirection: Axis.vertical,
             physics: ClampingScrollPhysics(),
             child: Container(
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 48),
+              padding: const EdgeInsets.only(left: 16, right: 16, top: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Container(
-                    height: 200,
+                    height: 150,
                     child: PageView(
                       controller: PageController(viewportFraction: 0.8),
                       scrollDirection: Axis.horizontal,
@@ -188,5 +189,26 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
             ),
           ),
         ));
+  }
+
+  void _onSignOutClicked() async {
+    try {
+      await widget.auth.signOut();
+      Navigator.of(context).pop();
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => LoginPage(auth: widget.auth)));
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  FirebaseUser getUser(Future<FirebaseUser> user) {
+    FirebaseUser result;
+    user.then((user) {
+      if (user != null) {
+        result = user;
+      }
+    });
+    return result;
   }
 }

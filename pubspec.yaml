@@ -19,8 +19,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cloud_firestore:
+  equatable:
   firebase_auth:
+  firebase_core:
+  file_picker:
+  rxdart:
+  flutter_bloc:
   firebase_database:
+  firebase_storage:
   bloc_pattern:
 
   # The following adds the Cupertino Icons font to your application.
@@ -45,8 +52,9 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - ic_car_red.png
-    - ic_car_green.png
+    - default-avatar.png
+    - room8-logo.png
+    - menu-top-background.jpg
     - ic_user.png
     - ic_lock.png
     - ic_mail.png
