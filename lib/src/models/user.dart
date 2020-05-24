@@ -7,5 +7,5 @@ class User {
   String id;
   String photoUrl;
 
-  User({this.id, this.photoUrl, this.email, this.phone, this.name});
+  User({this.id, this.email, this.name, this.phone, this.photoUrl});
 }

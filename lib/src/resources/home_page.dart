@@ -1,26 +1,25 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
+import 'package:flutter_app/src/models/user.dart';
 import 'package:flutter_app/src/resources/login_page.dart';
 import './page.dart';
 
 class MenuDashboardPage extends StatefulWidget {
-  MenuDashboardPage({this.auth});
+  MenuDashboardPage({Key key, this.auth, this.currentUser}) : super(key: key);
   final BaseAuth auth;
+  final User currentUser;
+  final fireStoreInstance = Firestore.instance;
 
   @override
   _MenuDashboardPageState createState() => _MenuDashboardPageState();
 }
 
-enum AuthStatus {
-  signedIn,
-}
-
 class _MenuDashboardPageState extends State<MenuDashboardPage>
     with TickerProviderStateMixin {
-  String currentProfilePic = null;
+  String name;
   bool isCollapsed = true;
   double screenWidth, screenHeight;
   final Duration duration = const Duration(milliseconds: 200);
@@ -55,9 +54,16 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
   }
 
   Widget dashboard(BuildContext context) {
-//    FirebaseUser user = this.getUser(widget.auth.currentUser());
-//    print(user);
-//    ref.getDownloadURL().then((loc) => setState(() => currentProfilePic = loc));
+    widget.fireStoreInstance
+        .collection("users")
+        .where("email", isEqualTo: widget.currentUser.email)
+        .getDocuments()
+        .then((value) {
+      value.documents.forEach((result) {
+        widget.currentUser.photoUrl = result["photourl"];
+        widget.currentUser.id = result["id"];
+      });
+    });
     return new Scaffold(
         appBar: new AppBar(
           title: new Text("My Room8",
@@ -81,12 +87,13 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
           child: new ListView(
             children: <Widget>[
               new UserAccountsDrawerHeader(
-                accountEmail: new Text("samsam@gmail.com"),
-                accountName: new Text("Sam Nguyen"),
+                accountEmail: new Text(widget.currentUser.email),
+                accountName: new Text(widget.currentUser.name),
                 currentAccountPicture: new GestureDetector(
                   child: new CircleAvatar(
-                    backgroundImage:
-                        new Image.asset('default-avatar.png').image,
+                    backgroundImage: widget.currentUser.photoUrl != null
+                        ? new NetworkImage(widget.currentUser.photoUrl)
+                        : new Image.asset('default-avatar.png').image,
                   ),
                   onTap: () => print("This is your current account."),
                 ),
@@ -96,7 +103,8 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
                         fit: BoxFit.fill)),
               ),
               new ListTile(
-                  title: new Text("Update room information"),
+                  title: new Text("Update room information",
+                      style: TextStyle(fontSize: 15)),
                   trailing: new Icon(Icons.home),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -105,7 +113,8 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
                             new Page("First Page")));
                   }),
               new ListTile(
-                  title: new Text("Update profile"),
+                  title: new Text("Update profile",
+                      style: TextStyle(fontSize: 15)),
                   trailing: new Icon(Icons.info),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -114,13 +123,12 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
                             new Page("First Page")));
                   }),
               new ListTile(
-                title: new Text("Cancel"),
+                title: new Text("Dashboard", style: TextStyle(fontSize: 15)),
                 trailing: new Icon(Icons.input),
                 onTap: () => Navigator.pop(context),
               ),
-              new Divider(),
               new ListTile(
-                title: new Text("Sign out"),
+                title: new Text("Sign out", style: TextStyle(fontSize: 15)),
                 trailing: new Icon(Icons.cancel),
                 onTap: _onSignOutClicked,
               ),
@@ -200,15 +208,5 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
     } catch (e) {
       print(e);
     }
-  }
-
-  FirebaseUser getUser(Future<FirebaseUser> user) {
-    FirebaseUser result;
-    user.then((user) {
-      if (user != null) {
-        result = user;
-      }
-    });
-    return result;
   }
 }

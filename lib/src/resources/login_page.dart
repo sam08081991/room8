@@ -1,6 +1,8 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
+import 'package:flutter_app/src/models/user.dart';
 import 'package:flutter_app/src/resources/register_page.dart';
 import 'dialog/loading_dialog.dart';
 import 'dialog/msg_dialog.dart';
@@ -128,10 +130,28 @@ class _LoginPageState extends State<LoginPage> {
 
   void _onLoginClick() {
     LoadingDialog.showLoadingDialog(context, "Loading...");
+    User loggedInUser = new User();
+    var db = FirebaseDatabase.instance.reference().child("users");
+    db
+        .orderByChild("email")
+        .equalTo(_email.text)
+        .once()
+        .then((DataSnapshot snapshot) {
+      Map<dynamic, dynamic> values = snapshot.value;
+      values.forEach((key, values) {
+        loggedInUser.name = values["name"];
+        loggedInUser.email = values["email"];
+        loggedInUser.phone = values["phone"];
+      });
+    });
     widget.auth.signIn(_email.text, _password.text, () {
       LoadingDialog.hideLoadingDialog(context);
+
       Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => MenuDashboardPage(auth: widget.auth)));
+          builder: (context) => MenuDashboardPage(
+                auth: widget.auth,
+                currentUser: loggedInUser,
+              )));
     }, (msg) {
       LoadingDialog.hideLoadingDialog(context);
       MsgDialog.showMsgDialog(context, "Sign-In", msg);

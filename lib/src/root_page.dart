@@ -11,22 +11,9 @@ class RootPage extends StatefulWidget {
   State<StatefulWidget> createState() => new _RootPageState();
 }
 
-enum AuthStatus {
-  notSignedIn,
-  signedIn,
-}
-
 class _RootPageState extends State<RootPage> {
-  AuthStatus authStatus = AuthStatus.notSignedIn;
-
   initState() {
     super.initState();
-  }
-
-  void _updateAuthStatus(AuthStatus status) {
-    setState(() {
-      authStatus = status;
-    });
   }
 
   @override

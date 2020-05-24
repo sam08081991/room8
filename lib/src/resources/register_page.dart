@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
+import 'package:flutter_app/src/models/user.dart';
 import 'dart:io';
 import 'dialog/loading_dialog.dart';
 import 'dialog/msg_dialog.dart';
@@ -200,23 +201,26 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   _onSignUpClicked() {
+    User signedUpUser = new User();
     var isValid = widget.auth.isValid(_nameController.text,
         _emailController.text, _passController.text, _phoneController.text);
     if (isValid) {
-      // create user
-      // loading dialog
       LoadingDialog.showLoadingDialog(context, 'Loading...');
       widget.auth.signUp(_emailController.text, _passController.text,
-          _phoneController.text, _nameController.text, photo, () {
+          _nameController.text, _phoneController.text, photo, () {
+        signedUpUser.name = _nameController.text;
+        signedUpUser.email = _emailController.text;
+        signedUpUser.phone = _phoneController.text;
+
         LoadingDialog.hideLoadingDialog(context);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => MenuDashboardPage(auth: widget.auth)));
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => MenuDashboardPage(
+                  auth: widget.auth,
+                  currentUser: signedUpUser,
+                )));
       }, (msg) {
         LoadingDialog.hideLoadingDialog(context);
-        MsgDialog.showMsgDialog(context, "Sign-In", msg);
-        // show msg dialog
+        MsgDialog.showMsgDialog(context, "Sign-up", msg);
       });
     }
   }

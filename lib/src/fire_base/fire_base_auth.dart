@@ -8,7 +8,7 @@ import 'dart:io';
 
 abstract class BaseAuth {
   Future<FirebaseUser> currentUser();
-  void signIn(String email, String pass, Function onSuccess,
+  String signIn(String email, String pass, Function onSuccess,
       Function(String) onSignInError);
   void signUp(String email, String pass, String name, String phone, File photo,
       Function onSuccess, Function(String) onRegisterError);
@@ -31,11 +31,13 @@ class FireAuth implements BaseAuth {
   @override
   void signUp(String email, String pass, String name, String phone, File photo,
       Function onSuccess, Function(String) onRegisterError) {
+    String userId;
     _fireBaseAuth
         .createUserWithEmailAndPassword(email: email, password: pass)
         .then((user) {
+      userId = user.user.uid;
       _createUser(
-          user.user.uid, name, phone, email, photo, onSuccess, onRegisterError);
+          userId, name, phone, email, photo, onSuccess, onRegisterError);
     }).catchError((err) {
       print("err: " + err.toString());
       _onSignUpErr(err.code, onRegisterError);
@@ -43,16 +45,19 @@ class FireAuth implements BaseAuth {
   }
 
   @override
-  void signIn(String email, String pass, Function onSuccess,
+  String signIn(String email, String pass, Function onSuccess,
       Function(String) onSignInError) {
+    String userId;
     _fireBaseAuth
         .signInWithEmailAndPassword(email: email, password: pass)
         .then((user) {
+      userId = user.user.uid;
       onSuccess();
     }).catchError((err) {
       print("err: " + err.toString());
       onSignInError("Cannot sign in, please try again");
     });
+    return userId;
   }
 
   bool isValid(String name, String email, String pass, String phone) {
@@ -85,6 +90,7 @@ class FireAuth implements BaseAuth {
 
   _createUser(String userId, String name, String phone, String email,
       File photo, Function onSuccess, Function(String) onRegisterError) {
+    String photoUrl;
     StorageUploadTask storageUploadTask;
     storageUploadTask = FirebaseStorage.instance
         .ref()
@@ -101,27 +107,28 @@ class FireAuth implements BaseAuth {
           'email': email,
           'phone': phone,
         });
+        photoUrl = url;
       }).catchError((err) {
         print("err: " + err.toString());
-        onRegisterError("SignUp fail, please try again");
+        onRegisterError("SignUp fail by saving to storage, please try again");
       }).whenComplete(() {
-        print("save to storage completed");
+        print("Save to storage completed");
       });
     });
 
     var user = Map<String, String>();
     user["name"] = name;
     user["email"] = email;
+    user["phone"] = phone;
 
     var ref = FirebaseDatabase.instance.reference().child("users");
     ref.child(userId).set(user).then((vl) {
-      print("on value: SUCCESSED");
       onSuccess();
     }).catchError((err) {
       print("err: " + err.toString());
-      onRegisterError("SignUp fail, please try again");
+      onRegisterError("SignUp fail by saving to realtime DB, please try again");
     }).whenComplete(() {
-      print("save to database completed");
+      print("Save to real time database completed");
     });
   }
 
