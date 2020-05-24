@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
@@ -17,32 +16,41 @@ class MenuDashboardPage extends StatefulWidget {
   _MenuDashboardPageState createState() => _MenuDashboardPageState();
 }
 
-class _MenuDashboardPageState extends State<MenuDashboardPage>
-    with TickerProviderStateMixin {
-  String name;
+class _MenuDashboardPageState extends State<MenuDashboardPage> {
   bool isCollapsed = true;
   double screenWidth, screenHeight;
-  final Duration duration = const Duration(milliseconds: 200);
-  AnimationController _controller;
+
+  updateState() {
+    widget.fireStoreInstance
+        .collection("users")
+        .where("email", isEqualTo: widget.currentUser.email)
+        .getDocuments()
+        .then((value) {
+      value.documents.forEach((result) {
+        setState(() {
+          widget.currentUser.photoUrl = result.data["photourl"];
+          widget.currentUser.id = result.data["id"];
+        });
+      });
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: duration);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    updateState();
     Size size = MediaQuery.of(context).size;
     screenHeight = size.height;
     screenWidth = size.width;
-
     return Scaffold(
       backgroundColor: Colors.black12,
       body: Stack(
@@ -54,16 +62,6 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
   }
 
   Widget dashboard(BuildContext context) {
-    widget.fireStoreInstance
-        .collection("users")
-        .where("email", isEqualTo: widget.currentUser.email)
-        .getDocuments()
-        .then((value) {
-      value.documents.forEach((result) {
-        widget.currentUser.photoUrl = result["photourl"];
-        widget.currentUser.id = result["id"];
-      });
-    });
     return new Scaffold(
         appBar: new AppBar(
           title: new Text("My Room8",
@@ -89,13 +87,10 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
               new UserAccountsDrawerHeader(
                 accountEmail: new Text(widget.currentUser.email),
                 accountName: new Text(widget.currentUser.name),
-                currentAccountPicture: new GestureDetector(
-                  child: new CircleAvatar(
-                    backgroundImage: widget.currentUser.photoUrl != null
-                        ? new NetworkImage(widget.currentUser.photoUrl)
-                        : new Image.asset('default-avatar.png').image,
-                  ),
-                  onTap: () => print("This is your current account."),
+                currentAccountPicture: new CircleAvatar(
+                  backgroundImage: widget.currentUser.photoUrl != null
+                      ? new NetworkImage(widget.currentUser.photoUrl)
+                      : new Image.asset('default-avatar.png').image,
                 ),
                 decoration: new BoxDecoration(
                     image: new DecorationImage(
