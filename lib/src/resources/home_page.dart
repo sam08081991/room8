@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
 import 'package:flutter_app/src/models/user.dart';
 import 'package:flutter_app/src/resources/login_page.dart';
-import './page.dart';
+import 'package:flutter_app/src/resources/page_template.dart';
 
 class MenuDashboardPage extends StatefulWidget {
   MenuDashboardPage({Key key, this.auth, this.currentUser}) : super(key: key);
@@ -73,9 +73,12 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.max,
               children: [
-                InkWell(
-                  child: Icon(Icons.settings, color: Colors.white70),
-                  onTap: () {},
+                Container(
+                  padding: EdgeInsets.fromLTRB(3, 0, 13, 0),
+                  child: InkWell(
+                    child: Icon(Icons.chat, color: Colors.white70),
+                    onTap: () {},
+                  ),
                 ),
               ],
             ),
@@ -100,12 +103,12 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
               new ListTile(
                   title: new Text("Update room information",
                       style: TextStyle(fontSize: 15)),
-                  trailing: new Icon(Icons.home),
+                  trailing: new Icon(Icons.hotel),
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(new MaterialPageRoute(
                         builder: (BuildContext context) =>
-                            new Page("First Page")));
+                            new PageTemplate("First Page")));
                   }),
               new ListTile(
                   title: new Text("Update profile",
@@ -115,16 +118,16 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(new MaterialPageRoute(
                         builder: (BuildContext context) =>
-                            new Page("First Page")));
+                            new PageTemplate("First Page")));
                   }),
               new ListTile(
                 title: new Text("Dashboard", style: TextStyle(fontSize: 15)),
-                trailing: new Icon(Icons.input),
+                trailing: new Icon(Icons.home),
                 onTap: () => Navigator.pop(context),
               ),
               new ListTile(
                 title: new Text("Sign out", style: TextStyle(fontSize: 15)),
-                trailing: new Icon(Icons.cancel),
+                trailing: new Icon(Icons.input),
                 onTap: _onSignOutClicked,
               ),
             ],
