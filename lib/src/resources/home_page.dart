@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
+import 'package:flutter_app/src/models/room.dart';
 import 'package:flutter_app/src/models/user.dart';
 import 'package:flutter_app/src/resources/login_page.dart';
 import 'package:flutter_app/src/resources/page_template.dart';
@@ -20,6 +21,7 @@ class MenuDashboardPage extends StatefulWidget {
 class _MenuDashboardPageState extends State<MenuDashboardPage> {
   bool isCollapsed = true;
   double screenWidth, screenHeight;
+  List<Room> allRooms;
 
   updateState() {
     widget.fireStoreInstance
@@ -110,6 +112,7 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
                     Navigator.of(context).push(new MaterialPageRoute(
                         builder: (BuildContext context) => new UpdateRoomInfo(
                               currentUser: widget.currentUser,
+                              auth: widget.auth,
                             )));
                   }),
               new ListTile(

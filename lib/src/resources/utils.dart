@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 
 class MultiPickerApp {
-  static Color navigateButton = Color(0xff141516);
+  static Color navigateButton = Colors.black26;
   static Color pauseButton = Color(0xffF41F00);
   static Color pauseButtonDarker = Color(0xff9B1400);
-  static Color background = Color(0xff1E2025);
+  static Color background = Colors.black54;
   static Color brighter = Color(0xff353235);
-  static Color darker = Colors.black;
+  static Color darker = Colors.black45;
 }
 
 // I  found this widget on Github
@@ -41,21 +41,9 @@ class ThreeDContainer extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      padding: EdgeInsets.all(width / 30),
+//      padding: EdgeInsets.all(width / 30),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(15)),
-        boxShadow: [
-          BoxShadow(
-              color: MultiPickerApp.darker,
-              offset: Offset(offset, offset),
-              blurRadius: blurRadius,
-              spreadRadius: spreadRadius),
-          BoxShadow(
-              color: MultiPickerApp.brighter,
-              offset: Offset(-offset, -offset),
-              blurRadius: blurRadius,
-              spreadRadius: spreadRadius),
-        ],
         gradient: LinearGradient(
           // Where the linear gradient begins and ends
           begin: Alignment.topLeft,

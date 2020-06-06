@@ -1,14 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
+import 'package:flutter_app/src/models/room.dart';
 import 'package:flutter_app/src/resources/utils.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/src/models/user.dart';
 
+import 'home_page.dart';
+
 @immutable
 class UpdateRoomInfo extends StatefulWidget {
-  UpdateRoomInfo({Key key, this.currentUser}) : super(key: key);
+  UpdateRoomInfo({Key key, this.currentUser, this.auth}) : super(key: key);
+  final BaseAuth auth;
   final User currentUser;
   final String title = 'My Room';
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
@@ -21,6 +26,7 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
   List<Asset> files = new List<Asset>();
   List<String> photoURLs = <String>[];
   String _error = 'No Error Dectected';
+  Room room;
 
   Future<void> loadAssets() async {
     List<Asset> resultList = List<Asset>();
@@ -31,7 +37,7 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
         enableCamera: true,
         cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
         materialOptions: MaterialOptions(
-          actionBarColor: "#abcdef",
+          actionBarColor: "#51555F",
           actionBarTitle: "Upload Image",
           allViewTitle: "All Photos",
         ),
@@ -55,15 +61,15 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
       postImage(imageFile).then((downloadUrl) {
         photoURLs.add(downloadUrl.toString());
         if (photoURLs.length == files.length) {
-          String documentID = DateTime.now().millisecondsSinceEpoch.toString();
           Firestore.instance
               .collection('images')
-              .document(documentID)
+              .document(widget.currentUser.id)
               .setData({'urls': photoURLs}).then((_) {
-            setState(() {
-              files = [];
-              photoURLs = [];
-            });
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => MenuDashboardPage(
+                      currentUser: widget.currentUser,
+                      auth: widget.auth,
+                    )));
           });
         }
       }).catchError((err) {
@@ -88,19 +94,13 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
   }
 
   Widget buildGridView() {
-    return GridView.count(
-      crossAxisCount: 3,
-      children: List.generate(files.length, (index) {
-        Asset asset = files[index];
-        return Padding(
-          padding: EdgeInsets.all(8.0),
-          child: ThreeDContainer(
-            backgroundColor: MultiPickerApp.darker,
-            backgroundDarkerColor: MultiPickerApp.darker,
-            height: 50,
-            width: 50,
-            borderDarkerColor: MultiPickerApp.pauseButton,
-            borderColor: MultiPickerApp.pauseButtonDarker,
+    return ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: files.length,
+        itemBuilder: (BuildContext c, int index) {
+          Asset asset = files[index];
+          return Padding(
+            padding: const EdgeInsets.only(right: 20),
             child: ClipRRect(
               borderRadius: BorderRadius.all(Radius.circular(15)),
               child: AssetThumb(
@@ -109,15 +109,18 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
                 height: 300,
               ),
             ),
-          ),
-        );
-      }),
-    );
+          );
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      appBar: new AppBar(
+        title: new Text(widget.title),
+        centerTitle: true,
+        backgroundColor: Colors.black54,
+      ),
       key: widget.scaffoldKey,
       body: Stack(
         children: <Widget>[
@@ -151,10 +154,9 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
                               context: context,
                               builder: (_) {
                                 return AlertDialog(
-                                  backgroundColor:
-                                      Theme.of(context).backgroundColor,
+                                  backgroundColor: Colors.white,
                                   content: Text("No image selected",
-                                      style: TextStyle(color: Colors.white)),
+                                      style: TextStyle(color: Colors.black87)),
                                   actions: <Widget>[
                                     InkWell(
                                       onTap: () {
@@ -163,8 +165,7 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
                                       child: ThreeDContainer(
                                         width: 80,
                                         height: 30,
-                                        backgroundColor:
-                                            MultiPickerApp.navigateButton,
+                                        backgroundColor: Colors.black87,
                                         backgroundDarkerColor:
                                             MultiPickerApp.background,
                                         child: Center(
@@ -178,10 +179,10 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
                                 );
                               });
                         } else {
-                          SnackBar snackbar = SnackBar(
+                          SnackBar snackBar = SnackBar(
                               content: Text('Please wait, we are uploading'));
                           widget.scaffoldKey.currentState
-                              .showSnackBar(snackbar);
+                              .showSnackBar(snackBar);
                           uploadImages();
                         }
                       },
@@ -192,7 +193,7 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
                         backgroundDarkerColor: MultiPickerApp.background,
                         child: Center(
                             child: Text(
-                          "Upload Images",
+                          "Update",
                           style: TextStyle(color: Colors.white),
                         )),
                       ),
@@ -204,6 +205,9 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
                 ),
                 Expanded(
                   child: buildGridView(),
+                ),
+                SizedBox(
+                  height: 300,
                 )
               ],
             ),
