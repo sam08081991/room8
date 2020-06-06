@@ -5,6 +5,7 @@ import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
 import 'package:flutter_app/src/models/user.dart';
 import 'package:flutter_app/src/resources/login_page.dart';
 import 'package:flutter_app/src/resources/page_template.dart';
+import 'package:flutter_app/src/resources/update_room_page.dart';
 
 class MenuDashboardPage extends StatefulWidget {
   MenuDashboardPage({Key key, this.auth, this.currentUser}) : super(key: key);
@@ -107,8 +108,9 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(new MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            new PageTemplate("First Page")));
+                        builder: (BuildContext context) => new UpdateRoomInfo(
+                              currentUser: widget.currentUser,
+                            )));
                   }),
               new ListTile(
                   title: new Text("Update profile",

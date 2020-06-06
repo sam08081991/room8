@@ -96,6 +96,7 @@ class FireAuth implements BaseAuth {
         .ref()
         .child('userPhotos')
         .child(userId)
+        .child('avatar')
         .child(userId)
         .putFile(photo);
     storageUploadTask.onComplete.then((ref) async {
