@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               Text(
-                "Login to continue using Rum8",
+                "Login to continue using Room8",
                 style: TextStyle(fontSize: 18, color: Color(0xff606470)),
               ),
               Padding(

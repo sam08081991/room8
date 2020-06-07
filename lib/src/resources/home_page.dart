@@ -33,6 +33,7 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
         setState(() {
           widget.currentUser.photoUrl = result.data["photourl"];
           widget.currentUser.id = result.data["id"];
+          widget.currentUser.roomId = result.data["roomId"];
         });
       });
     });

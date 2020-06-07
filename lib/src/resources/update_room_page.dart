@@ -17,16 +17,38 @@ class UpdateRoomInfo extends StatefulWidget {
   final User currentUser;
   final String title = 'My Room';
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
+  final fireStoreInstance = Firestore.instance;
+  final Room room = new Room();
 
   @override
-  UpdateRoomInfoState createState() => UpdateRoomInfoState();
+  _UpdateRoomInfoState createState() => _UpdateRoomInfoState();
 }
 
-class UpdateRoomInfoState extends State<UpdateRoomInfo> {
+class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
   List<Asset> files = new List<Asset>();
-  List<String> photoURLs = <String>[];
+  List<String> statePhotoURLs = <String>[];
   String _error = 'No Error Dectected';
-  Room room;
+
+  updateState() {
+    widget.fireStoreInstance
+        .collection("rooms")
+        .where("owner_email", isEqualTo: widget.currentUser.email)
+        .getDocuments()
+        .then((value) {
+      value.documents.forEach((result) {
+        setState(() {
+          widget.room.ownerEmail = result.data["owner_email"];
+          widget.room.photoUrls = List.from(result.data["photo_urls"]);
+          widget.room.address = result.data["address"];
+          widget.room.area = result.data["area"];
+          widget.room.numberOfSlots = result.data["number_of_slot"];
+          widget.room.neededSlots = result.data["needed_slots"];
+          widget.room.hasAttic = result.data["has_attic"];
+          widget.room.isFreeEntrance = result.data["is_free_entrance"];
+        });
+      });
+    });
+  }
 
   Future<void> loadAssets() async {
     List<Asset> resultList = List<Asset>();
@@ -59,23 +81,68 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
   void uploadImages() {
     for (var imageFile in files) {
       postImage(imageFile).then((downloadUrl) {
-        photoURLs.add(downloadUrl.toString());
-        if (photoURLs.length == files.length) {
-          Firestore.instance
-              .collection('images')
-              .document(widget.currentUser.id)
-              .setData({'urls': photoURLs}).then((_) {
-            Navigator.of(context).push(MaterialPageRoute(
+        statePhotoURLs.add(downloadUrl.toString());
+        if (statePhotoURLs.length == files.length) {
+          setState(() {
+            statePhotoURLs.forEach((element) {
+              if (widget.room.photoUrls == null) {
+                widget.room.photoUrls = new List<String>();
+              }
+              widget.room.photoUrls.add(element);
+            });
+            statePhotoURLs.clear();
+            files.clear();
+            updateRoomInfo();
+            Navigator.of(context).push(
+              MaterialPageRoute(
                 builder: (context) => MenuDashboardPage(
-                      currentUser: widget.currentUser,
-                      auth: widget.auth,
-                    )));
+                  currentUser: widget.currentUser,
+                  auth: widget.auth,
+                ),
+              ),
+            );
           });
         }
       }).catchError((err) {
         print(err);
       });
     }
+  }
+
+  void updateRoomInfo() {
+    if (widget.currentUser.roomId == null) {
+      widget.fireStoreInstance
+          .collection('rooms')
+          .document(widget.currentUser.id)
+          .setData({
+        'owner_email': widget.currentUser.email,
+        'photo_urls': widget.room.photoUrls,
+        'address': widget.room.address,
+        'area': widget.room.area,
+        'number_of_slots': widget.room.numberOfSlots,
+        'needed_slots': widget.room.neededSlots,
+        'has_attic': widget.room.hasAttic,
+        'is_free_entrance': widget.room.isFreeEntrance,
+      });
+    } else {
+      widget.fireStoreInstance
+          .collection('rooms')
+          .document(widget.currentUser.id)
+          .updateData({
+        'owner_email': widget.currentUser.email,
+        'photo_urls': widget.room.photoUrls,
+        'address': widget.room.address,
+        'area': widget.room.area,
+        'number_of_slots': widget.room.numberOfSlots,
+        'needed_slots': widget.room.neededSlots,
+        'has_attic': widget.room.hasAttic,
+        'is_free_entrance': widget.room.isFreeEntrance,
+      });
+    }
+    widget.fireStoreInstance
+        .collection('users')
+        .document(widget.currentUser.id)
+        .updateData({'roomId': widget.currentUser.id});
   }
 
   Future<dynamic> postImage(Asset imageFile) async {
@@ -94,23 +161,130 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
   }
 
   Widget buildGridView() {
-    return ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: files.length,
-        itemBuilder: (BuildContext c, int index) {
-          Asset asset = files[index];
-          return Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(15)),
-              child: AssetThumb(
-                asset: asset,
-                width: 300,
-                height: 300,
+    if (files.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "New Picked Images",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          );
-        });
+            SizedBox(height: 5),
+            Expanded(
+              child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: files.length,
+                  itemBuilder: (BuildContext c, int index) {
+                    Asset asset = files[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 20),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                        child: new AssetThumb(
+                          asset: asset,
+                          width: 300,
+                          height: 300,
+                        ),
+                      ),
+                    );
+                  }),
+            ),
+            SizedBox(height: 5),
+            Text(
+              "Current Images",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 5),
+            Expanded(child: LayoutBuilder(builder: (_, constraint) {
+              if (widget.room.photoUrls != null) {
+                return ListView.builder(
+                  padding: const EdgeInsets.only(right: 20),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: widget.room.photoUrls.length,
+                  itemBuilder: (BuildContext c, int index) {
+                    return _buildCurrentPhotoItem(constraint, index);
+                  },
+                );
+              } else {
+                return Card(child: SizedBox(height: 80));
+              }
+            })),
+          ],
+        ),
+      );
+    } else if (widget.room.photoUrls != null) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "Current Images",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 5),
+            Expanded(
+              child: LayoutBuilder(builder: (_, constraint) {
+                return ListView.builder(
+                  padding: const EdgeInsets.only(right: 20),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: widget.room.photoUrls.length,
+                  itemBuilder: (BuildContext c, int index) {
+                    return _buildCurrentPhotoItem(constraint, index);
+                  },
+                );
+              }),
+            ),
+            SizedBox(height: 100),
+          ],
+        ),
+      );
+    } else {
+      return SizedBox(height: 50);
+    }
+  }
+
+  Card _buildCurrentPhotoItem(BoxConstraints constraint, int index) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Container(
+        width: 100,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(15)),
+          image: DecorationImage(
+            image: NetworkImage(widget.room.photoUrls[index]),
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    updateState();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -208,7 +382,7 @@ class UpdateRoomInfoState extends State<UpdateRoomInfo> {
                 ),
                 SizedBox(
                   height: 300,
-                )
+                ),
               ],
             ),
           ),
