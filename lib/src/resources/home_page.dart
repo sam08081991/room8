@@ -5,7 +5,7 @@ import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
 import 'package:flutter_app/src/models/room.dart';
 import 'package:flutter_app/src/models/user.dart';
 import 'package:flutter_app/src/resources/login_page.dart';
-import 'package:flutter_app/src/resources/page_template.dart';
+import 'package:flutter_app/src/resources/update_profile_page.dart';
 import 'package:flutter_app/src/resources/update_room_page.dart';
 
 class MenuDashboardPage extends StatefulWidget {
@@ -118,11 +118,14 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
                   trailing: new Icon(Icons.hotel),
                   onTap: () {
                     Navigator.of(context).pop();
-                    Navigator.of(context).push(new MaterialPageRoute(
+                    Navigator.of(context).push(
+                      new MaterialPageRoute(
                         builder: (BuildContext context) => new UpdateRoomInfo(
-                              currentUser: widget.currentUser,
-                              auth: widget.auth,
-                            )));
+                          currentUser: widget.currentUser,
+                          auth: widget.auth,
+                        ),
+                      ),
+                    );
                   }),
               new ListTile(
                   title: new Text("Update profile",
@@ -130,15 +133,16 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
                   trailing: new Icon(Icons.info),
                   onTap: () {
                     Navigator.of(context).pop();
-                    Navigator.of(context).push(new MaterialPageRoute(
+                    Navigator.of(context).push(
+                      new MaterialPageRoute(
                         builder: (BuildContext context) =>
-                            new PageTemplate("First Page")));
+                            new UpdateProfilePage(
+                          currentUser: widget.currentUser,
+                          auth: widget.auth,
+                        ),
+                      ),
+                    );
                   }),
-              new ListTile(
-                title: new Text("Dashboard", style: TextStyle(fontSize: 15)),
-                trailing: new Icon(Icons.home),
-                onTap: () => Navigator.pop(context),
-              ),
               new ListTile(
                 title: new Text("Sign out", style: TextStyle(fontSize: 15)),
                 trailing: new Icon(Icons.input),
