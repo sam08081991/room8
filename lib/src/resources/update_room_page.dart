@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
@@ -28,6 +29,20 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
   List<Asset> files = new List<Asset>();
   List<String> statePhotoURLs = <String>[];
   String _error = 'No Error Dectected';
+  List<int> numbers = <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  List<String> areas = <String>[
+    "nhỏ  10 mét vuông",
+    "15 mét vuông",
+    "20 mét vuông",
+    "25 mét vuông",
+    "hơn 25 mét vuông"
+  ];
+  int _numberOfSlots = 1;
+  int _neededSlots = 1;
+  String _selectedArea;
+  TextEditingController _address = TextEditingController();
+  bool _hasAttic = false;
+  bool _isFreeEntrance = false;
 
   updateState() {
     widget.fireStoreInstance
@@ -41,10 +56,24 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
           widget.room.photoUrls = List.from(result.data["photo_urls"]);
           widget.room.address = result.data["address"];
           widget.room.area = result.data["area"];
-          widget.room.numberOfSlots = result.data["number_of_slot"];
+          widget.room.numberOfSlots = result.data["number_of_slots"];
           widget.room.neededSlots = result.data["needed_slots"];
           widget.room.hasAttic = result.data["has_attic"];
           widget.room.isFreeEntrance = result.data["is_free_entrance"];
+
+          _neededSlots =
+              widget.room.neededSlots != null ? widget.room.neededSlots : 1;
+          _numberOfSlots =
+              widget.room.numberOfSlots != null ? widget.room.numberOfSlots : 1;
+          _selectedArea =
+              widget.room.area != null ? widget.room.area : "nhỏ  10 mét vuông";
+          _address.text =
+              widget.room.address != null ? widget.room.address : "";
+          _hasAttic =
+              widget.room.hasAttic != null ? widget.room.hasAttic : false;
+          _isFreeEntrance = widget.room.isFreeEntrance != null
+              ? widget.room.isFreeEntrance
+              : false;
         });
       });
     });
@@ -79,32 +108,100 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
   }
 
   void uploadImages() {
-    for (var imageFile in files) {
-      postImage(imageFile).then((downloadUrl) {
-        statePhotoURLs.add(downloadUrl.toString());
-        if (statePhotoURLs.length == files.length) {
-          setState(() {
-            statePhotoURLs.forEach((element) {
-              if (widget.room.photoUrls == null) {
-                widget.room.photoUrls = new List<String>();
-              }
-              widget.room.photoUrls.add(element);
-            });
-            statePhotoURLs.clear();
-            files.clear();
-            updateRoomInfo();
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => MenuDashboardPage(
-                  currentUser: widget.currentUser,
-                  auth: widget.auth,
+    if (files.length != 0) {
+      for (var imageFile in files) {
+        postImage(imageFile).then((downloadUrl) {
+          statePhotoURLs.add(downloadUrl.toString());
+          if (statePhotoURLs.length == files.length) {
+            setState(() {
+              statePhotoURLs.forEach((element) {
+                if (widget.room.photoUrls == null) {
+                  widget.room.photoUrls = new List<String>();
+                }
+                widget.room.photoUrls.add(element);
+              });
+              statePhotoURLs.clear();
+              files.clear();
+              updateRoomInfo();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => MenuDashboardPage(
+                    currentUser: widget.currentUser,
+                    auth: widget.auth,
+                  ),
                 ),
-              ),
-            );
-          });
-        }
-      }).catchError((err) {
-        print(err);
+              );
+            });
+          }
+        }).catchError((err) {
+          print(err);
+        });
+      }
+    } else {
+      statePhotoURLs.clear();
+      files.clear();
+      updateRoomInfo();
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => MenuDashboardPage(
+            currentUser: widget.currentUser,
+            auth: widget.auth,
+          ),
+        ),
+      );
+    }
+  }
+
+  List<DropdownMenuItem<String>> buildDropdownMenuStringItems(List areas) {
+    List<DropdownMenuItem<String>> items = List();
+    for (String area in areas) {
+      items.add(
+        DropdownMenuItem(
+          value: area,
+          child: Text(area),
+        ),
+      );
+    }
+    return items;
+  }
+
+  List<DropdownMenuItem<int>> buildDropdownMenuNumberItems(List numbers) {
+    List<DropdownMenuItem<int>> items = List();
+    for (int number in numbers) {
+      items.add(
+        DropdownMenuItem(
+          value: number,
+          child: Text("${number}"),
+        ),
+      );
+    }
+    return items;
+  }
+
+  void toggleCheckboxHasAttic(bool value) {
+    if (_hasAttic == false) {
+      setState(() {
+        _hasAttic = true;
+        widget.room.hasAttic = true;
+      });
+    } else {
+      setState(() {
+        _hasAttic = false;
+        widget.room.hasAttic = false;
+      });
+    }
+  }
+
+  void toggleCheckboxIsFreeEntrance(bool value) {
+    if (_isFreeEntrance == false) {
+      setState(() {
+        _isFreeEntrance = true;
+        widget.room.isFreeEntrance = true;
+      });
+    } else {
+      setState(() {
+        _isFreeEntrance = false;
+        widget.room.isFreeEntrance = false;
       });
     }
   }
@@ -117,12 +214,12 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
           .setData({
         'owner_email': widget.currentUser.email,
         'photo_urls': widget.room.photoUrls,
-        'address': widget.room.address,
+        'address': _address.text,
         'area': widget.room.area,
-        'number_of_slots': widget.room.numberOfSlots,
-        'needed_slots': widget.room.neededSlots,
-        'has_attic': widget.room.hasAttic,
-        'is_free_entrance': widget.room.isFreeEntrance,
+        'number_of_slots': _numberOfSlots,
+        'needed_slots': _neededSlots,
+        'has_attic': _hasAttic,
+        'is_free_entrance': _isFreeEntrance,
       });
     } else {
       widget.fireStoreInstance
@@ -131,12 +228,12 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
           .updateData({
         'owner_email': widget.currentUser.email,
         'photo_urls': widget.room.photoUrls,
-        'address': widget.room.address,
+        'address': _address.text,
         'area': widget.room.area,
-        'number_of_slots': widget.room.numberOfSlots,
-        'needed_slots': widget.room.neededSlots,
-        'has_attic': widget.room.hasAttic,
-        'is_free_entrance': widget.room.isFreeEntrance,
+        'number_of_slots': _numberOfSlots,
+        'needed_slots': _neededSlots,
+        'has_attic': _hasAttic,
+        'is_free_entrance': _isFreeEntrance,
       });
     }
     widget.fireStoreInstance
@@ -312,64 +409,34 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
                       child: ThreeDContainer(
                         width: 130,
                         height: 50,
-                        backgroundColor: MultiPickerApp.navigateButton,
+                        backgroundColor: Colors.black12,
                         backgroundDarkerColor: MultiPickerApp.background,
                         child: Center(
-                            child: Text(
-                          "Pick images",
-                          style: TextStyle(color: Colors.white),
-                        )),
+                          child: Icon(
+                            Icons.add_a_photo,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                     InkWell(
                       onTap: () {
-                        if (files.length == 0) {
-                          showDialog(
-                              context: context,
-                              builder: (_) {
-                                return AlertDialog(
-                                  backgroundColor: Colors.white,
-                                  content: Text("No image selected",
-                                      style: TextStyle(color: Colors.black87)),
-                                  actions: <Widget>[
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: ThreeDContainer(
-                                        width: 80,
-                                        height: 30,
-                                        backgroundColor: Colors.black87,
-                                        backgroundDarkerColor:
-                                            MultiPickerApp.background,
-                                        child: Center(
-                                            child: Text(
-                                          "Ok",
-                                          style: TextStyle(color: Colors.white),
-                                        )),
-                                      ),
-                                    )
-                                  ],
-                                );
-                              });
-                        } else {
-                          SnackBar snackBar = SnackBar(
-                              content: Text('Please wait, we are uploading'));
-                          widget.scaffoldKey.currentState
-                              .showSnackBar(snackBar);
-                          uploadImages();
-                        }
+                        SnackBar snackBar = SnackBar(
+                            content: Text('Please wait, we are updating'));
+                        widget.scaffoldKey.currentState.showSnackBar(snackBar);
+                        uploadImages();
                       },
                       child: ThreeDContainer(
                         width: 130,
                         height: 50,
-                        backgroundColor: MultiPickerApp.navigateButton,
+                        backgroundColor: Colors.black12,
                         backgroundDarkerColor: MultiPickerApp.background,
                         child: Center(
-                            child: Text(
-                          "Update",
-                          style: TextStyle(color: Colors.white),
-                        )),
+                          child: Icon(
+                            Icons.system_update_alt,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -380,9 +447,141 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
                 Expanded(
                   child: buildGridView(),
                 ),
-                SizedBox(
-                  height: 300,
+                Container(
+                  padding: const EdgeInsets.fromLTRB(5, 50, 20, 0),
+                  child: TextFormField(
+                    controller: _address,
+                    autocorrect: false,
+                    validator: (val) =>
+                        val.isEmpty ? 'Address can\'t be empty.' : null,
+                    decoration: InputDecoration(
+                      icon: Icon(
+                        Icons.edit_location,
+                        color: Colors.black87,
+                        size: 30,
+                      ),
+                      hintText: 'Địa chỉ',
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
                 ),
+                Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Icon(Icons.zoom_out_map),
+                      Text("Diện tích:", style: TextStyle(fontSize: 16)),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton(
+                          value: _selectedArea,
+                          items: areas
+                              .map<DropdownMenuItem<String>>((String item) {
+                            return DropdownMenuItem(
+                              value: item,
+                              child: Text(item),
+                            );
+                          }).toList(),
+                          onChanged: (selectedArea) {
+                            setState(() {
+                              _selectedArea = selectedArea;
+                              widget.room.area = selectedArea;
+                            });
+                          },
+                        ),
+                      ),
+                      Container(
+                        width: 20,
+                        child: Image.asset("stair-icon.png"),
+                      ),
+                      Text("Có gác:", style: TextStyle(fontSize: 16)),
+                      Checkbox(
+                        value: _hasAttic,
+                        onChanged: (value) {
+                          toggleCheckboxHasAttic(value);
+                        },
+                        activeColor: Colors.black54,
+                        checkColor: Colors.white,
+                        tristate: false,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Icon(Icons.people),
+                      Text("Số người:", style: TextStyle(fontSize: 16)),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton(
+                          value: _numberOfSlots,
+                          items: numbers.map<DropdownMenuItem<int>>((int item) {
+                            return DropdownMenuItem(
+                              value: item,
+                              child: Text("${item}"),
+                            );
+                          }).toList(),
+                          onChanged: (selectedItem) {
+                            setState(() {
+                              _numberOfSlots = selectedItem;
+                              widget.room.numberOfSlots = selectedItem;
+                            });
+                          },
+                        ),
+                      ),
+                      Container(
+                        width: 55,
+                      ),
+                      Container(
+                        width: 20,
+                        child: Icon(Icons.timelapse),
+                      ),
+                      Text("Mở cửa tự do:", style: TextStyle(fontSize: 16)),
+                      Checkbox(
+                        value: _isFreeEntrance,
+                        onChanged: (value) {
+                          toggleCheckboxIsFreeEntrance(value);
+                        },
+                        activeColor: Colors.black54,
+                        checkColor: Colors.white,
+                        tristate: false,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 220, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      Icon(Icons.group_add),
+                      Text(
+                        "Số chỗ trống:",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton(
+                          value: _neededSlots,
+                          items: numbers.map<DropdownMenuItem<int>>((int item) {
+                            return DropdownMenuItem(
+                              value: item,
+                              child: Text("${item}"),
+                            );
+                          }).toList(),
+                          onChanged: (selectedItem) {
+                            setState(() {
+                              _neededSlots = selectedItem;
+                              widget.room.neededSlots = selectedItem;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                )
               ],
             ),
           ),

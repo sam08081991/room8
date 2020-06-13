@@ -2,7 +2,7 @@ class Room {
   String ownerEmail;
   List<String> photoUrls;
   String address;
-  double area;
+  String area;
   int numberOfSlots;
   int neededSlots;
   bool hasAttic;

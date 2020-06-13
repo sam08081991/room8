@@ -90,6 +90,7 @@ class FireAuth implements BaseAuth {
 
   _createUser(String userId, String name, String phone, String email,
       File photo, Function onSuccess, Function(String) onRegisterError) {
+    String photoUrl;
     StorageUploadTask storageUploadTask;
     storageUploadTask = FirebaseStorage.instance
         .ref()
@@ -107,6 +108,7 @@ class FireAuth implements BaseAuth {
           'email': email,
           'phone': phone,
         });
+        photoUrl = url;
       }).catchError((err) {
         print("err: " + err.toString());
         onRegisterError("SignUp fail by saving to storage, please try again");
@@ -119,6 +121,7 @@ class FireAuth implements BaseAuth {
     user["name"] = name;
     user["email"] = email;
     user["phone"] = phone;
+    user["photourl"] = photoUrl;
 
     var ref = FirebaseDatabase.instance.reference().child("users");
     ref.child(userId).set(user).then((vl) {

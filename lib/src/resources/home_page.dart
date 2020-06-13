@@ -21,7 +21,9 @@ class MenuDashboardPage extends StatefulWidget {
 class _MenuDashboardPageState extends State<MenuDashboardPage> {
   bool isCollapsed = true;
   double screenWidth, screenHeight;
-  List<Room> allRooms;
+  List<Room> _allRooms;
+  String _defaultAvatarUrl =
+      "https://firebasestorage.googleapis.com/v0/b/rum8-68bb5.appspot.com/o/userPhotos%2FGFomAo3eAJgC19xPQBL2HrGoRPH2%2Favatar%2FGFomAo3eAJgC19xPQBL2HrGoRPH2?alt=media&token=44b5f71e-ce83-473f-b6cf-f326e584b5ae";
 
   updateState() {
     widget.fireStoreInstance
@@ -52,6 +54,11 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
   @override
   Widget build(BuildContext context) {
     updateState();
+    setState(() {
+      if (widget.currentUser.photoUrl == null) {
+        widget.currentUser.photoUrl = _defaultAvatarUrl;
+      }
+    });
     Size size = MediaQuery.of(context).size;
     screenHeight = size.height;
     screenWidth = size.width;
@@ -95,9 +102,10 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
                 accountEmail: new Text(widget.currentUser.email),
                 accountName: new Text(widget.currentUser.name),
                 currentAccountPicture: new CircleAvatar(
-                  backgroundImage: widget.currentUser.photoUrl != null
-                      ? new NetworkImage(widget.currentUser.photoUrl)
-                      : new Image.asset('default-avatar.png').image,
+                  backgroundImage:
+                      widget.currentUser.photoUrl != _defaultAvatarUrl
+                          ? new NetworkImage(widget.currentUser.photoUrl)
+                          : new Image.asset('default-avatar.png').image,
                 ),
                 decoration: new BoxDecoration(
                     image: new DecorationImage(

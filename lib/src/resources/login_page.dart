@@ -142,6 +142,7 @@ class _LoginPageState extends State<LoginPage> {
         loggedInUser.name = values["name"];
         loggedInUser.email = values["email"];
         loggedInUser.phone = values["phone"];
+        loggedInUser.photoUrl = values["photourl"];
       });
     });
     widget.auth.signIn(_email.text, _password.text, () {

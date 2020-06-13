@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cloud_firestore:
+  cloud_firestore: ^0.12.9+5
   equatable:
   firebase_auth:
   firebase_storage:
@@ -64,21 +64,7 @@ flutter:
     - ic_lock.png
     - ic_mail.png
     - ic_phone.png
-    - ic_location_black.png
-    - ic_map_nav.png
-    - ic_notify.png
-    - ic_remove_x.png
-    - ic_menu.png
-    - ic_menu_help.png
-    - ic_menu_history.png
-    - ic_menu_logout.png
-    - ic_menu_notify.png
-    - ic_menu_percent.png
-    - ic_menu_user.png
-    - ic_pickup_hatchback.png
-    - ic_pickup_sedan.png
-    - ic_pickup_suv.png
-    - ic_pickup_van.png
+    - stair-icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
