@@ -29,7 +29,7 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
   List<Asset> files = new List<Asset>();
   List<String> statePhotoURLs = <String>[];
   String _error = 'No Error Dectected';
-  List<int> numbers = <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  List<int> numbers = <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   List<String> areas = <String>[
     "nhỏ  10 mét vuông",
     "15 mét vuông",
@@ -41,6 +41,7 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
   int _neededSlots = 1;
   String _selectedArea;
   TextEditingController _address = TextEditingController();
+  TextEditingController _price = TextEditingController();
   bool _hasAttic = false;
   bool _isFreeEntrance = false;
 
@@ -60,11 +61,12 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
           widget.room.neededSlots = result.data["needed_slots"];
           widget.room.hasAttic = result.data["has_attic"];
           widget.room.isFreeEntrance = result.data["is_free_entrance"];
+          widget.room.price = result.data["price"];
 
           _neededSlots =
-              widget.room.neededSlots != null ? widget.room.neededSlots : 1;
+              widget.room.neededSlots != null ? widget.room.neededSlots : 0;
           _numberOfSlots =
-              widget.room.numberOfSlots != null ? widget.room.numberOfSlots : 1;
+              widget.room.numberOfSlots != null ? widget.room.numberOfSlots : 0;
           _selectedArea =
               widget.room.area != null ? widget.room.area : "nhỏ  10 mét vuông";
           _address.text =
@@ -74,6 +76,7 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
           _isFreeEntrance = widget.room.isFreeEntrance != null
               ? widget.room.isFreeEntrance
               : false;
+          _price.text = widget.room.price != null ? widget.room.price : "0";
         });
       });
     });
@@ -220,6 +223,7 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
         'needed_slots': _neededSlots,
         'has_attic': _hasAttic,
         'is_free_entrance': _isFreeEntrance,
+        'price': _price.text,
       });
     } else {
       widget.fireStoreInstance
@@ -234,6 +238,7 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
         'needed_slots': _neededSlots,
         'has_attic': _hasAttic,
         'is_free_entrance': _isFreeEntrance,
+        'price': _price.text,
       });
     }
     widget.fireStoreInstance
@@ -265,7 +270,7 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              "New Picked Images",
+              "Hình mới",
               textAlign: TextAlign.left,
               style: TextStyle(
                 fontSize: 16,
@@ -294,7 +299,7 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
             ),
             SizedBox(height: 5),
             Text(
-              "Current Images",
+              "Hình hiện có",
               textAlign: TextAlign.left,
               style: TextStyle(
                 fontSize: 16,
@@ -326,7 +331,7 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              "Current Images",
+              "Hình hiện có",
               textAlign: TextAlign.left,
               style: TextStyle(
                 fontSize: 16,
@@ -422,7 +427,7 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
                     InkWell(
                       onTap: () {
                         SnackBar snackBar = SnackBar(
-                            content: Text('Please wait, we are updating'));
+                            content: Text('Hệ thống đang cập nhật...'));
                         widget.scaffoldKey.currentState.showSnackBar(snackBar);
                         uploadImages();
                       },
@@ -550,7 +555,7 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 220, 0),
+                  padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
@@ -576,11 +581,31 @@ class _UpdateRoomInfoState extends State<UpdateRoomInfo> {
                           },
                         ),
                       ),
+                      Container(
+                        width: 200,
+                        child: TextField(
+                          controller: _price,
+                          autocorrect: false,
+                          decoration: InputDecoration(
+                            icon: Icon(
+                              Icons.monetization_on,
+                              color: Colors.black87,
+                              size: 30,
+                            ),
+                            hintText: 'Giá phòng',
+                            border: const OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            WhitelistingTextInputFormatter.digitsOnly
+                          ], // Only numbers can be entered
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: 30,
                 )
               ],
             ),

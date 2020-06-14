@@ -7,6 +7,7 @@ class Room {
   int neededSlots;
   bool hasAttic;
   bool isFreeEntrance;
+  String price;
 
   Room(
       {this.ownerEmail,
@@ -16,5 +17,6 @@ class Room {
       this.numberOfSlots,
       this.neededSlots,
       this.hasAttic,
-      this.isFreeEntrance});
+      this.isFreeEntrance,
+      this.price});
 }
