@@ -31,10 +31,8 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
     "25 mét vuông",
     "hơn 25 mét vuông"
   ];
-  int _neededSlots = 1;
-  String _selectedArea;
-  bool _hasAttic = false;
-  bool _isFreeEntrance = false;
+  TextEditingController _searchController = TextEditingController();
+  String query = "";
 
   updateState() {
     widget.fireStoreInstance
@@ -109,17 +107,49 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
     Size size = MediaQuery.of(context).size;
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("My Room8",
-            style: TextStyle(fontSize: 24, color: Colors.white70)),
+        title: new PreferredSize(
+          child: Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (val) {
+                setState(() {
+                  query = val;
+                });
+              },
+              cursorColor: Colors.black87,
+              autofocus: true,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 20,
+              ),
+              decoration: InputDecoration(
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.close, color: Colors.white),
+                  onPressed: () {
+                    WidgetsBinding.instance
+                        .addPostFrameCallback((_) => _searchController.clear());
+                  },
+                ),
+                border: InputBorder.none,
+                hintText: "Search",
+                hintStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Color(0x88ffffff),
+                ),
+              ),
+            ),
+          ),
+        ),
         centerTitle: true,
         backgroundColor: Colors.black54,
         actions: <Widget>[
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            mainAxisSize: MainAxisSize.max,
             children: [
               Container(
-                padding: EdgeInsets.fromLTRB(3, 0, 13, 0),
+                padding: EdgeInsets.fromLTRB(0, 0, 13, 0),
                 child: InkWell(
                   child: Icon(Icons.chat, color: Colors.white70),
                   onTap: () {},
@@ -183,24 +213,38 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
           ],
         ),
       ),
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index < _allRooms.length) {
-                  return _cardBuilder(size, _allRooms[index]);
-                } else {
-                  return SizedBox(
-                    height: 10,
-                  );
-                }
-              },
-              childCount: _allRooms.length,
-            ),
+      body: buildSuggestions(query, size),
+    );
+  }
+
+  buildSuggestions(String query, Size size) {
+    final List<Room> suggestionList = query.isEmpty
+        ? _allRooms
+        : _allRooms.where((Room room) {
+            String _query = query.toLowerCase();
+            String _getPrice =
+                room.price != null ? room.price.toLowerCase() : "";
+            String _getAddress = room.address.toLowerCase();
+            return (_getAddress.contains(_query) || _getPrice.contains(_query));
+          }).toList();
+
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              if (index < suggestionList.length) {
+                return _cardBuilder(size, suggestionList[index]);
+              } else {
+                return SizedBox(
+                  height: 10,
+                );
+              }
+            },
+            childCount: suggestionList.length,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -312,6 +356,23 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
                                       color: Colors.black87,
                                     ),
                                   ),
+                                  SizedBox(width: 5),
+                                  Icon(
+                                    Icons.timelapse,
+                                    size: 20,
+                                    color: item.isFreeEntrance == true
+                                        ? Colors.black87
+                                        : Colors.white12,
+                                  ),
+                                  SizedBox(width: 5),
+                                  Container(
+                                    width: 20,
+                                    child: item.hasAttic == true
+                                        ? Image.asset("stair-icon.png")
+                                        : SizedBox(
+                                            width: 1,
+                                          ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -356,18 +417,6 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
         ),
       ),
     );
-  }
-
-  void toggleCheckboxIsFreeEntrance(bool value) {
-    if (_isFreeEntrance == false) {
-      setState(() {
-        _isFreeEntrance = true;
-      });
-    } else {
-      setState(() {
-        _isFreeEntrance = false;
-      });
-    }
   }
 
   void _onSignOutClicked() async {
