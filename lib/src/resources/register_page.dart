@@ -88,7 +88,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               Text(
-                "Sign up Rum8 in simple steps",
+                "Đăng ký Room8 bằng những bước đơn giản",
                 style: TextStyle(fontSize: 16, color: Color(0xff606470)),
               ),
               Padding(
@@ -101,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           decoration: InputDecoration(
                               errorText:
                                   snapshot.hasError ? snapshot.error : null,
-                              labelText: "Name",
+                              labelText: "Tên",
                               prefixIcon: Container(
                                   width: 50, child: Image.asset("ic_user.png")),
                               border: OutlineInputBorder(
@@ -117,7 +117,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         controller: _phoneController,
                         style: TextStyle(fontSize: 18, color: Colors.black),
                         decoration: InputDecoration(
-                            labelText: "Phone Number",
+                            labelText: "Số điện thoại",
                             errorText:
                                 snapshot.hasError ? snapshot.error : null,
                             prefixIcon: Container(
@@ -157,7 +157,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         decoration: InputDecoration(
                             errorText:
                                 snapshot.hasError ? snapshot.error : null,
-                            labelText: "Password",
+                            labelText: "Mật khẩu",
                             prefixIcon: Container(
                                 width: 50, child: Image.asset("ic_lock.png")),
                             border: OutlineInputBorder(
@@ -174,7 +174,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: RaisedButton(
                     onPressed: _onSignUpClicked,
                     child: Text(
-                      "Sign up",
+                      "Đăng ký",
                       style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
                     color: Colors.black54,
@@ -187,13 +187,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
                 child: RichText(
                   text: TextSpan(
-                      text: "Already a User? ",
+                      text: "Đã có tài khoản? ",
                       style: TextStyle(color: Color(0xff606470), fontSize: 16),
                       children: <TextSpan>[
                         TextSpan(
-                            text: "Login now",
-                            style:
-                                TextStyle(color: Colors.black54, fontSize: 16))
+                            text: "Đăng nhập ngay",
+                            style: TextStyle(
+                                color: Color(0xff3277D8), fontSize: 16))
                       ]),
                 ),
               )
@@ -224,7 +224,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 )));
       }, (msg) {
         LoadingDialog.hideLoadingDialog(context);
-        MsgDialog.showMsgDialog(context, "Sign-up", msg);
+        MsgDialog.showMsgDialog(context, "Đăng ký", msg);
       });
     }
   }

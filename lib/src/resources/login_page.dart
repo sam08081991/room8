@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               Text(
-                "Login to continue using Room8",
+                "Đăng nhập để tiếp tục sử dụng Room8",
                 style: TextStyle(fontSize: 18, color: Color(0xff606470)),
               ),
               Padding(
@@ -68,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.all(Radius.circular(6)))),
                   autocorrect: false,
                   validator: (val) =>
-                      val.isEmpty ? 'Email can\'t be empty.' : null,
+                      val.isEmpty ? 'Email không được rỗng' : null,
                   controller: _email,
                 ),
               ),
@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
                 style: TextStyle(fontSize: 18, color: Colors.black),
                 obscureText: true,
                 decoration: InputDecoration(
-                    labelText: "Password",
+                    labelText: "Mật khẩu",
                     prefixIcon:
                         Container(width: 50, child: Image.asset("ic_lock.png")),
                     border: OutlineInputBorder(
@@ -86,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.all(Radius.circular(6)))),
                 autocorrect: false,
                 validator: (val) =>
-                    val.isEmpty ? 'Password can\'t be empty.' : null,
+                    val.isEmpty ? 'Mật khẩu không được rỗng' : null,
                 controller: _password,
               ),
               Padding(
@@ -97,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: RaisedButton(
                     onPressed: _onLoginClick,
                     child: Text(
-                      "Log In",
+                      "Đăng nhập",
                       style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
                     color: Colors.black54,
@@ -110,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 40),
                 child: RichText(
                   text: TextSpan(
-                      text: "New user? ",
+                      text: "Người dùng mới? ",
                       style: TextStyle(color: Color(0xff606470), fontSize: 16),
                       children: <TextSpan>[
                         TextSpan(
@@ -122,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                                         builder: (context) =>
                                             RegisterPage(auth: widget.auth)));
                               },
-                            text: "Sign up for a new account",
+                            text: "Đăng ký tài khoản mới",
                             style: TextStyle(
                                 color: Color(0xff3277D8), fontSize: 16))
                       ]),
@@ -162,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
               )));
     }, (msg) {
       LoadingDialog.hideLoadingDialog(context);
-      MsgDialog.showMsgDialog(context, "Sign-In", msg);
+      MsgDialog.showMsgDialog(context, "Đăng nhập", msg);
     });
   }
 }
