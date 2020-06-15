@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
 import 'package:flutter_app/src/models/room.dart';
 import 'package:flutter_app/src/models/user.dart';
+import 'package:flutter_app/src/resources/chat_list_page.dart';
 import 'package:flutter_app/src/resources/login_page.dart';
 import 'package:flutter_app/src/resources/room_detail_page.dart';
 import 'package:flutter_app/src/resources/update_profile_page.dart';
@@ -153,7 +154,16 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
                 padding: EdgeInsets.fromLTRB(0, 0, 13, 0),
                 child: InkWell(
                   child: Icon(Icons.chat, color: Colors.white70),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ChatListPage(
+                          auth: widget.auth,
+                          currentUser: widget.currentUser,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
