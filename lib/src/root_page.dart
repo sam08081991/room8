@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/src/repository/fire_base_auth.dart';
 import 'package:flutter_app/src/resources/login_page.dart';
-import 'fire_base/fire_base_auth.dart';
-import 'resources/home_page.dart';
 
 class RootPage extends StatefulWidget {
   RootPage({Key key, this.auth}) : super(key: key);

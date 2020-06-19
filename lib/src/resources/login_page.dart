@@ -1,8 +1,8 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
 import 'package:flutter_app/src/models/user.dart';
+import 'package:flutter_app/src/repository/fire_base_auth.dart';
 import 'package:flutter_app/src/resources/register_page.dart';
 import 'dialog/loading_dialog.dart';
 import 'dialog/msg_dialog.dart';
@@ -149,7 +149,6 @@ class _LoginPageState extends State<LoginPage> {
         loggedInUser.name = values["name"];
         loggedInUser.email = values["email"];
         loggedInUser.phone = values["phone"];
-        loggedInUser.photoUrl = values["photourl"];
       });
     });
     widget.auth.signIn(_email.text, _password.text, () {

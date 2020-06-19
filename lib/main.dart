@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
+import 'package:flutter_app/src/repository/fire_base_auth.dart';
 import 'package:flutter_app/src/root_page.dart';
 
 void main() => runApp(new MyApp());

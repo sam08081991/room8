@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
 import 'package:flutter_app/src/models/room.dart';
 import 'package:flutter_app/src/models/user.dart';
+import 'package:flutter_app/src/repository/fire_base_auth.dart';
+import 'package:flutter_app/src/resources/chat_detail_page.dart';
 import 'package:flutter_app/src/resources/home_page.dart';
 
 class RoomDetailPage extends StatefulWidget {
@@ -12,6 +14,7 @@ class RoomDetailPage extends StatefulWidget {
   final Room room;
   final User currentUser;
   final FireAuth auth;
+  final fireStoreInstance = Firestore.instance;
 
   @override
   _RoomDetailPageState createState() => _RoomDetailPageState();
@@ -30,10 +33,28 @@ class _RoomDetailPageState extends State<RoomDetailPage>
   bool isExpanded = false;
   double sheetItemHeight;
   Map mapVal;
+  User receiver = new User();
 
   @override
   void initState() {
     super.initState();
+
+    widget.fireStoreInstance
+        .collection("users")
+        .where("email", isEqualTo: widget.room.ownerEmail)
+        .getDocuments()
+        .then((value) {
+      value.documents.forEach((result) {
+        setState(() {
+          receiver.id = result.data["id"];
+          receiver.name = result.data["name"];
+          receiver.email = result.data["email"];
+          receiver.phone = result.data["phone"];
+          receiver.photoUrl = result.data["photourl"];
+          receiver.roomId = result.data["roomId"];
+        });
+      });
+    });
 
     fadeController =
         AnimationController(duration: Duration(milliseconds: 180), vsync: this);
@@ -94,7 +115,18 @@ class _RoomDetailPageState extends State<RoomDetailPage>
             margin: EdgeInsets.only(right: 25),
             child: InkWell(
               child: Icon(Icons.chat),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatDetailPage(
+                      receiver: receiver,
+                      currentUser: widget.currentUser,
+                      auth: widget.auth,
+                    ),
+                  ),
+                );
+              },
             ),
           )
         ],
@@ -165,7 +197,7 @@ class _RoomDetailPageState extends State<RoomDetailPage>
           text: TextSpan(
             style: TextStyle(color: Colors.white, fontSize: 30),
             children: [
-              TextSpan(text: widget.currentUser.name),
+              TextSpan(text: receiver.name),
               WidgetSpan(
                 child: Container(
                   height: 5,

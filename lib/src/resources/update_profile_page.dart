@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
 import 'package:flutter_app/src/models/user.dart';
+import 'package:flutter_app/src/repository/fire_base_auth.dart';
 import 'home_page.dart';
 
 class UpdateProfilePage extends StatefulWidget {

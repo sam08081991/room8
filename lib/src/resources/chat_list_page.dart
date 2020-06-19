@@ -1,8 +1,16 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
+import 'package:flutter_app/src/models/contact.dart';
 import 'package:flutter_app/src/models/user.dart';
-import 'package:flutter_app/src/resources/chat_detail_page.dart';
-import 'customTile.dart';
+import 'package:flutter_app/src/repository/chat_methods.dart';
+import 'package:flutter_app/src/repository/fire_base_auth.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'contact_view.dart';
 import 'home_page.dart';
 
 class ChatListPage extends StatefulWidget {
@@ -15,6 +23,76 @@ class ChatListPage extends StatefulWidget {
 }
 
 class _ChatListPageState extends State<ChatListPage> {
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  final ChatMethods _chatMethods = ChatMethods();
+
+  @override
+  void initState() {
+    super.initState();
+    registerNotification();
+    configLocalNotification();
+  }
+
+  void registerNotification() {
+    firebaseMessaging.requestNotificationPermissions();
+
+    firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
+      print('onMessage: $message');
+      Platform.isAndroid
+          ? showNotification(message['notification'])
+          : showNotification(message['aps']['alert']);
+      return;
+    }, onResume: (Map<String, dynamic> message) {
+      print('onResume: $message');
+      return;
+    }, onLaunch: (Map<String, dynamic> message) {
+      print('onLaunch: $message');
+      return;
+    });
+
+    firebaseMessaging.getToken().then((token) {
+      print('token: $token');
+      Firestore.instance
+          .collection('users')
+          .document(widget.currentUser.id)
+          .updateData({'pushToken': token});
+    }).catchError((err) {
+      Fluttertoast.showToast(msg: err.message.toString());
+    });
+  }
+
+  void showNotification(message) async {
+    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+      Platform.isAndroid ? 'com.example.flutter_app' : 'com.example.flutterApp',
+      'Room8',
+      'You have new message',
+      playSound: true,
+      enableVibration: true,
+      importance: Importance.Max,
+      priority: Priority.High,
+    );
+    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
+    var platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+
+    print(message);
+
+    await flutterLocalNotificationsPlugin.show(0, message['title'].toString(),
+        message['body'].toString(), platformChannelSpecifics,
+        payload: json.encode(message));
+  }
+
+  void configLocalNotification() {
+    var initializationSettingsAndroid =
+        new AndroidInitializationSettings('app_icon');
+    var initializationSettingsIOS = new IOSInitializationSettings();
+    var initializationSettings = new InitializationSettings(
+        initializationSettingsAndroid, initializationSettingsIOS);
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -46,113 +124,52 @@ class _ChatListPageState extends State<ChatListPage> {
           ),
         ),
       ),
-      body: ChatListContainer(widget.currentUser, widget.auth),
+      body: chatListContainer(widget.currentUser.id),
     );
   }
-}
 
-class ChatListContainer extends StatefulWidget {
-  final User currentUser;
-  final BaseAuth auth;
-
-  ChatListContainer(this.currentUser, this.auth);
-
-  @override
-  _ChatListContainerState createState() => _ChatListContainerState();
-}
-
-class _ChatListContainerState extends State<ChatListContainer> {
-  @override
-  Widget build(BuildContext context) {
+  Widget chatListContainer(String userId) {
     return Container(
-      child: ListView.builder(
-        padding: EdgeInsets.all(10),
-        itemCount: 2,
-        itemBuilder: (context, index) {
-          return CustomTile(
-            mini: false,
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => ChatDetailPage(
-                    auth: widget.auth,
-                    currentUser: widget.currentUser,
-                  ),
-                ),
-              );
-            },
-            title: Text(
-              "User Name",
-              style: TextStyle(
-                  color: Colors.black87, fontFamily: "Arial", fontSize: 19),
-            ),
-            subtitle: Text(
-              "Message",
-              style: TextStyle(
-                color: UniversalVariables.greyColor,
-                fontSize: 14,
-              ),
-            ),
-            leading: Container(
-              constraints: BoxConstraints(maxHeight: 60, maxWidth: 60),
-              child: Stack(
-                children: <Widget>[
-                  CircleAvatar(
-                    maxRadius: 30,
-                    backgroundColor: Colors.grey,
-                    backgroundImage: Image.asset("default-avatar.png").image,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class UserCircle extends StatelessWidget {
-  final String text;
-
-  UserCircle(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 40,
-      width: 40,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(50),
-        color: UniversalVariables.separatorColor,
-      ),
-      child: Stack(
-        children: <Widget>[
-          Align(
-            alignment: Alignment.center,
-            child: Text(
-              text,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: UniversalVariables.lightBlueColor,
-                fontSize: 13,
-              ),
-            ),
+      child: StreamBuilder<QuerySnapshot>(
+          stream: _chatMethods.fetchContacts(
+            userId: userId,
           ),
-//          Align(
-//            alignment: Alignment.bottomRight,
-//            child: Container(
-//              height: 12,
-//              width: 12,
-//              decoration: BoxDecoration(
-//                  shape: BoxShape.circle,
-//                  border: Border.all(
-//                      color: UniversalVariables.blackColor, width: 2),
-//                  color: UniversalVariables.onlineDotColor),
-//            ),
-//          )
-        ],
-      ),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              var docList = snapshot.data.documents;
+              if (docList.isEmpty) {
+                return Center(
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 35, horizontal: 100),
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          "Danh sách rỗng",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w300,
+                              fontSize: 30,
+                              color: Colors.black38),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return ListView.builder(
+                padding: EdgeInsets.all(10),
+                itemCount: docList.length,
+                itemBuilder: (context, index) {
+                  Contact contact = Contact.fromMap(docList[index].data);
+
+                  return ContactView(contact, widget.currentUser);
+                },
+              );
+            }
+
+            return Center(child: CircularProgressIndicator());
+          }),
     );
   }
 }

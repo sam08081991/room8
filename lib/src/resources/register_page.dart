@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_app/src/fire_base/fire_base_auth.dart';
 import 'package:flutter_app/src/models/user.dart';
+import 'package:flutter_app/src/repository/fire_base_auth.dart';
 import 'dart:io';
 import 'dialog/loading_dialog.dart';
 import 'dialog/msg_dialog.dart';
