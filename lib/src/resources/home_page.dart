@@ -11,6 +11,8 @@ import 'package:flutter_app/src/resources/room_detail_page.dart';
 import 'package:flutter_app/src/resources/update_profile_page.dart';
 import 'package:flutter_app/src/resources/update_room_page.dart';
 
+import 'chat_detail_page.dart';
+
 class MenuDashboardPage extends StatefulWidget {
   MenuDashboardPage({Key key, this.auth, this.currentUser}) : super(key: key);
   final BaseAuth auth;
@@ -259,6 +261,7 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
   }
 
   Widget _cardBuilder(Size size, Room item) {
+    User receiver = new User();
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Container(
@@ -423,7 +426,34 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
                     ),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(30.0),
-                      onTap: () {},
+                      onTap: () {
+                        widget.fireStoreInstance
+                            .collection("users")
+                            .where("email", isEqualTo: item.ownerEmail)
+                            .getDocuments()
+                            .then((value) {
+                          value.documents.forEach((result) {
+                            setState(() {
+                              receiver.id = result.data["id"];
+                              receiver.name = result.data["name"];
+                              receiver.email = result.data["email"];
+                              receiver.phone = result.data["phone"];
+                              receiver.photoUrl = result.data["photourl"];
+                              receiver.roomId = result.data["roomId"];
+                            });
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatDetailPage(
+                                  receiver: receiver,
+                                  currentUser: widget.currentUser,
+                                  auth: widget.auth,
+                                ),
+                              ),
+                            );
+                          });
+                        });
+                      },
                       child: Icon(
                         Icons.chat,
                         color: Colors.white,
