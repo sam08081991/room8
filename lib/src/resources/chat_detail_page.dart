@@ -24,6 +24,17 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   TextEditingController textFieldController = TextEditingController();
   final ChatMethods _chatMethods = ChatMethods();
   bool isWriting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Firestore.instance
+        .collection('users')
+        .document(widget.currentUser.id)
+        .updateData({'chattingWith': widget.receiver.id});
+    setState(() {});
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -43,6 +54,10 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
               color: Colors.white,
             ),
             onTap: () {
+              Firestore.instance
+                  .collection('users')
+                  .document(widget.currentUser.id)
+                  .updateData({'chattingWith': null});
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ChatListPage(

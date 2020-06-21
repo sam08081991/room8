@@ -1,15 +1,9 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/src/models/contact.dart';
 import 'package:flutter_app/src/models/user.dart';
 import 'package:flutter_app/src/repository/chat_methods.dart';
 import 'package:flutter_app/src/repository/fire_base_auth.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'contact_view.dart';
 import 'home_page.dart';
 
@@ -23,74 +17,11 @@ class ChatListPage extends StatefulWidget {
 }
 
 class _ChatListPageState extends State<ChatListPage> {
-  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
   final ChatMethods _chatMethods = ChatMethods();
 
   @override
   void initState() {
     super.initState();
-    registerNotification();
-    configLocalNotification();
-  }
-
-  void registerNotification() {
-    firebaseMessaging.requestNotificationPermissions();
-
-    firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
-      print('onMessage: $message');
-      Platform.isAndroid
-          ? showNotification(message['notification'])
-          : showNotification(message['aps']['alert']);
-      return;
-    }, onResume: (Map<String, dynamic> message) {
-      print('onResume: $message');
-      return;
-    }, onLaunch: (Map<String, dynamic> message) {
-      print('onLaunch: $message');
-      return;
-    });
-
-    firebaseMessaging.getToken().then((token) {
-      print('token: $token');
-      Firestore.instance
-          .collection('users')
-          .document(widget.currentUser.id)
-          .updateData({'pushToken': token});
-    }).catchError((err) {
-      Fluttertoast.showToast(msg: err.message.toString());
-    });
-  }
-
-  void showNotification(message) async {
-    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-      Platform.isAndroid ? 'com.example.flutter_app' : 'com.example.flutterApp',
-      'Room8',
-      'You have new message',
-      playSound: true,
-      enableVibration: true,
-      importance: Importance.Max,
-      priority: Priority.High,
-    );
-    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
-    var platformChannelSpecifics = new NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-
-    print(message);
-
-    await flutterLocalNotificationsPlugin.show(0, message['title'].toString(),
-        message['body'].toString(), platformChannelSpecifics,
-        payload: json.encode(message));
-  }
-
-  void configLocalNotification() {
-    var initializationSettingsAndroid =
-        new AndroidInitializationSettings('app_icon');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   @override
