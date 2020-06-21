@@ -219,74 +219,74 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       });
     }
 
-    addMediaModal(context) {
-      showModalBottomSheet(
-          context: context,
-          elevation: 0,
-          backgroundColor: UniversalVariables.blackColor,
-          builder: (context) {
-            return Column(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  child: Row(
-                    children: <Widget>[
-                      FlatButton(
-                        child: Icon(
-                          Icons.close,
-                        ),
-                        onPressed: () => Navigator.maybePop(context),
-                      ),
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Content and tools",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Flexible(
-                  child: ListView(
-                    children: <Widget>[
-                      ModalTile(
-                        title: "Media",
-                        subtitle: "Share Photos and Video",
-                        icon: Icons.image,
-                      ),
-                      ModalTile(
-                          title: "File",
-                          subtitle: "Share files",
-                          icon: Icons.tab),
-                      ModalTile(
-                          title: "Contact",
-                          subtitle: "Share contacts",
-                          icon: Icons.contacts),
-                      ModalTile(
-                          title: "Location",
-                          subtitle: "Share a location",
-                          icon: Icons.add_location),
-                      ModalTile(
-                          title: "Schedule Call",
-                          subtitle: "Arrange a skype call and get reminders",
-                          icon: Icons.schedule),
-                      ModalTile(
-                          title: "Create Poll",
-                          subtitle: "Share polls",
-                          icon: Icons.poll)
-                    ],
-                  ),
-                ),
-              ],
-            );
-          });
-    }
+//    addMediaModal(context) {
+//      showModalBottomSheet(
+//          context: context,
+//          elevation: 0,
+//          backgroundColor: UniversalVariables.blackColor,
+//          builder: (context) {
+//            return Column(
+//              children: <Widget>[
+//                Container(
+//                  padding: EdgeInsets.symmetric(vertical: 15),
+//                  child: Row(
+//                    children: <Widget>[
+//                      FlatButton(
+//                        child: Icon(
+//                          Icons.close,
+//                        ),
+//                        onPressed: () => Navigator.maybePop(context),
+//                      ),
+//                      Expanded(
+//                        child: Align(
+//                          alignment: Alignment.centerLeft,
+//                          child: Text(
+//                            "Content and tools",
+//                            style: TextStyle(
+//                                color: Colors.white,
+//                                fontSize: 20,
+//                                fontWeight: FontWeight.bold),
+//                          ),
+//                        ),
+//                      ),
+//                    ],
+//                  ),
+//                ),
+//                Flexible(
+//                  child: ListView(
+//                    children: <Widget>[
+//                      ModalTile(
+//                        title: "Media",
+//                        subtitle: "Share Photos and Video",
+//                        icon: Icons.image,
+//                      ),
+//                      ModalTile(
+//                          title: "File",
+//                          subtitle: "Share files",
+//                          icon: Icons.tab),
+//                      ModalTile(
+//                          title: "Contact",
+//                          subtitle: "Share contacts",
+//                          icon: Icons.contacts),
+//                      ModalTile(
+//                          title: "Location",
+//                          subtitle: "Share a location",
+//                          icon: Icons.add_location),
+//                      ModalTile(
+//                          title: "Schedule Call",
+//                          subtitle: "Arrange a skype call and get reminders",
+//                          icon: Icons.schedule),
+//                      ModalTile(
+//                          title: "Create Poll",
+//                          subtitle: "Share polls",
+//                          icon: Icons.poll)
+//                    ],
+//                  ),
+//                ),
+//              ],
+//            );
+//          });
+//    }
 
     sendMessage() {
       var text = textFieldController.text;
@@ -311,22 +311,24 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       padding: EdgeInsets.all(10),
       child: Row(
         children: <Widget>[
-          GestureDetector(
-            onTap: () => addMediaModal(context),
-            child: Container(
-              padding: EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                gradient: UniversalVariables.fabGradient,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.add),
-            ),
-          ),
+//          GestureDetector(
+//            onTap: () => addMediaModal(context),
+//            child: Container(
+//              padding: EdgeInsets.all(5),
+//              decoration: BoxDecoration(
+//                gradient: UniversalVariables.fabGradient,
+//                shape: BoxShape.circle,
+//              ),
+//              child: Icon(Icons.add),
+//            ),
+//          ),
           SizedBox(
             width: 5,
           ),
           Expanded(
             child: TextField(
+              autocorrect: false,
+              enableSuggestions: false,
               controller: textFieldController,
               style: TextStyle(
                 color: Colors.white,
@@ -350,20 +352,21 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                     EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                 filled: true,
                 fillColor: UniversalVariables.separatorColor,
-                suffixIcon: GestureDetector(
-                  onTap: () {},
-                  child: Icon(Icons.face),
-                ),
+
+//                suffixIcon: GestureDetector(
+//                  onTap: () {},
+//                  child: Icon(Icons.face),
+//                ),
               ),
             ),
           ),
-          isWriting
-              ? Container()
-              : Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Icon(Icons.record_voice_over),
-                ),
-          isWriting ? Container() : Icon(Icons.camera_alt),
+//          isWriting
+//              ? Container()
+//              : Padding(
+//                  padding: EdgeInsets.symmetric(horizontal: 10),
+//                  child: Icon(Icons.record_voice_over),
+//                ),
+//          isWriting ? Container() : Icon(Icons.camera_alt),
           isWriting
               ? Container(
                   margin: EdgeInsets.only(left: 10),

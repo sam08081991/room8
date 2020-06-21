@@ -1,8 +1,5 @@
-import 'dart:convert';
 import 'dart:ui';
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/src/models/room.dart';
@@ -13,8 +10,6 @@ import 'package:flutter_app/src/resources/login_page.dart';
 import 'package:flutter_app/src/resources/room_detail_page.dart';
 import 'package:flutter_app/src/resources/update_profile_page.dart';
 import 'package:flutter_app/src/resources/update_room_page.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class MenuDashboardPage extends StatefulWidget {
   MenuDashboardPage({Key key, this.auth, this.currentUser}) : super(key: key);
@@ -27,9 +22,6 @@ class MenuDashboardPage extends StatefulWidget {
 }
 
 class _MenuDashboardPageState extends State<MenuDashboardPage> {
-  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
   bool isCollapsed = true;
   double screenWidth, screenHeight;
   List<Room> _allRooms = new List<Room>();
@@ -58,10 +50,6 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
         });
       });
     });
-    _getData();
-  }
-
-  Future<void> _getData() async {
     widget.fireStoreInstance.collection("rooms").getDocuments().then((value) {
       List<Room> rooms = new List();
 
@@ -93,70 +81,6 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
   void initState() {
     super.initState();
     updateState();
-    configLocalNotification();
-    registerNotification();
-  }
-
-  void registerNotification() {
-    firebaseMessaging.requestNotificationPermissions();
-
-    firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
-      print('onMessage: $message');
-      Platform.isAndroid
-          ? showNotification(message['notification'])
-          : showNotification(message['aps']['alert']);
-      return;
-    }, onResume: (Map<String, dynamic> message) {
-      print('onResume: $message');
-      return;
-    }, onLaunch: (Map<String, dynamic> message) {
-      print('onLaunch: $message');
-      return;
-    });
-
-    firebaseMessaging.getToken().then((token) {
-      print('token: $token');
-      Firestore.instance
-          .collection('users')
-          .document(widget.currentUser.id)
-          .updateData({'pushToken': token});
-    }).catchError((err) {
-      Fluttertoast.showToast(msg: err.message.toString());
-    });
-  }
-
-  void showNotification(message) async {
-    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-      Platform.isAndroid ? 'com.example.flutter_app' : 'com.example.flutterApp',
-      'Room8',
-      'your channel description',
-      playSound: true,
-      enableVibration: true,
-      importance: Importance.Max,
-      priority: Priority.High,
-    );
-     var initializationSettingsAndroid =
-        new AndroidInitializationSettings('app_icon');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
-    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
-    var platformChannelSpecifics = new NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-
-    await flutterLocalNotificationsPlugin.show(0, message['title'].toString(),
-        message['body'].toString(), platformChannelSpecifics,
-        payload: json.encode(message));
-  }
-
-  void configLocalNotification() {
-    var initializationSettingsAndroid =
-        new AndroidInitializationSettings('app_icon');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   @override
@@ -316,22 +240,19 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
 
     return CustomScrollView(
       slivers: <Widget>[
-        RefreshIndicator(
-          child: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index < suggestionList.length) {
-                  return _cardBuilder(size, suggestionList[index]);
-                } else {
-                  return SizedBox(
-                    height: 10,
-                  );
-                }
-              },
-              childCount: suggestionList.length,
-            ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              if (index < suggestionList.length) {
+                return _cardBuilder(size, suggestionList[index]);
+              } else {
+                return SizedBox(
+                  height: 10,
+                );
+              }
+            },
+            childCount: suggestionList.length,
           ),
-          onRefresh: _getData,
         ),
       ],
     );

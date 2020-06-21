@@ -22,11 +22,8 @@ exports.sendNotification = functions.firestore
       .get()
       .then(querySnapshot => {
         querySnapshot.forEach(userTo => {
-          console.log(`Found receiverId: ${idTo}`)
-          console.log(`Found senderId: ${idFrom}`)
-          console.log(`Found pushToken: ${userTo.data().pushToken}`)
-          console.log(`Found chattingWith: ${userTo.data().chattingWith}`)
-          if (userTo.data().pushToken) {
+          console.log(`Found receiver: ${userTo.data().name}`)
+          if (userTo.data().pushToken && userTo.data().chattingWith !== idFrom) {
             // Get info user from (sent)
             admin
               .firestore()
