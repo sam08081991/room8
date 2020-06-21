@@ -58,7 +58,10 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
         });
       });
     });
+    _getData();
+  }
 
+  Future<void> _getData() async {
     widget.fireStoreInstance.collection("rooms").getDocuments().then((value) {
       List<Room> rooms = new List();
 
@@ -313,19 +316,22 @@ class _MenuDashboardPageState extends State<MenuDashboardPage> {
 
     return CustomScrollView(
       slivers: <Widget>[
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              if (index < suggestionList.length) {
-                return _cardBuilder(size, suggestionList[index]);
-              } else {
-                return SizedBox(
-                  height: 10,
-                );
-              }
-            },
-            childCount: suggestionList.length,
+        RefreshIndicator(
+          child: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                if (index < suggestionList.length) {
+                  return _cardBuilder(size, suggestionList[index]);
+                } else {
+                  return SizedBox(
+                    height: 10,
+                  );
+                }
+              },
+              childCount: suggestionList.length,
+            ),
           ),
+          onRefresh: _getData,
         ),
       ],
     );

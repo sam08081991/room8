@@ -22,6 +22,7 @@ class ChatDetailPage extends StatefulWidget {
 
 class _ChatDetailPageState extends State<ChatDetailPage> {
   TextEditingController textFieldController = TextEditingController();
+  ScrollController _listScrollController = ScrollController();
   final ChatMethods _chatMethods = ChatMethods();
   bool isWriting = false;
 
@@ -109,7 +110,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
           .collection("messages")
           .document(widget.currentUser.id)
           .collection(widget.receiver.id)
-          .orderBy("timestamp", descending: false)
+          .orderBy("timestamp", descending: true)
           .snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.data == null) {
@@ -121,6 +122,8 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
           itemBuilder: (context, index) {
             return chatMessageItem(snapshot.data.documents[index]);
           },
+          controller: _listScrollController,
+          reverse: true,
         );
       },
     );
